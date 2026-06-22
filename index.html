@@ -16,25 +16,26 @@
             margin: 0;
         }
 
-        .wheel-wrapper {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            margin-bottom: 30px;
-        }
+       .wheel-wrapper {
+    position: relative;
+    width: 600px;  /* 從 400px 改為 600px */
+    height: 600px; /* 從 400px 改為 600px */
+    margin-bottom: 40px;
+}
 
-        .pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 30px solid #ff4d4d;
-            z-index: 10;
-        }
+/* 轉盤頂部的指標也跟著放大 */
+.pointer {
+    position: absolute;
+    top: -20px; /* 稍微往上拉一點 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;  /* 從 15px 變 20px */
+    border-right: 20px solid transparent; /* 從 15px 變 20px */
+    border-top: 40px solid #ff4d4d;       /* 從 30px 變 40px */
+    z-index: 10;
+}
 
         canvas {
             border-radius: 50%;
@@ -124,11 +125,13 @@
               ctx.textAlign = "right";
               ctx.fillStyle = "#333";
               
-              const isSmallSlice = (prizesData[i].weight / totalWeight) < 0.05;
-              ctx.font = isSmallSlice ? "bold 12px sans-serif" : "bold 16px sans-serif";
-              
-              ctx.fillText(prizesData[i].name, radius - 20, 5);
-              ctx.restore();
+             const isSmallSlice = (prizesData[i].weight / totalWeight) < 0.05;
+ctx.font = isSmallSlice ? "bold 18px sans-serif" : "bold 24px sans-serif";
+
+// 調整文字位置：radius - 30 讓字稍微遠離邊緣，8 讓字對齊中央
+ctx.fillText(prizesData[i].name, radius - 30, 8);
+
+ctx.restore();
 
               currentAngle += sliceAngle;
           }
