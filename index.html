@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸運抽獎轉盤</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        /* 轉盤頂部的指標 */
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ff4d4d;
+            z-index: 10;
+        }
+
+        canvas {
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            /* 動畫時間設定為 4 秒，使用 ease-out 讓結尾有減速效果 */
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #333;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    </div>
+    
+    <button id="spinBtn">開始旋轉</button>
+    <div id="result"></div>
+
+    <script>
+      const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spinBtn');
+const resultDiv = document.getElementById('result');
+
+// 定義獎項與對應的「權重」(Weight)
+// 這裡的權重同時代表「機率」與「視覺面積」
+const prizesData = [
+    { name: "SUPER 72", weight: 20, color: "#FFB6C1" },       // 佔 1%
+    { name: "心跳蔓越莓", weight: 20, color: "#FFDAB9" },       // 佔 4%
+    { name: "折扣$100", weight: 20, color: "#E6E6FA" },      // 佔 15%
+    { name: "折扣$200", weight: 20, color: "#ADD8E6" },      // 佔 30%
+    { name: "銘謝惠顧", weight: 20, color: "#D3D3D3" }        // 佔 50%
+];
+
+// 計算總權重
+const totalWeight = prizesData.reduce((sum, prize) => sum + prize.weight, 0);
+
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const radius = canvas.width / 2;
+
+let currentRotation = 0;
+let isSpinning = false;
+
+// 1. 根據真實機率繪製轉盤
+function drawWheel() {
+    let currentAngle = 0; // 記錄畫到哪個角度了 (弧度)
+
+    for (let i = 0; i < prizesData.length; i++) {
+        // 計算這個獎項應該佔據的圓心角 (弧度)
+        const sliceAngle = (prizesData[i].weight / totalWeight) * 2 * Math.PI;
+
+        // 畫扇形
+        ctx.beginPath();
+        ctx.fillStyle = prizesData[i].color;
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.lineTo(centerX, centerY);
+        ctx.fill();
+
+        // 畫文字
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        // 將文字放在扇形的正中間
+        ctx.rotate(currentAngle + sliceAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#333";
+        
+        // 如果面積太小(例如1%)，字可能會擠在一起，這裡稍微調小一點字體
+        const isSmallSlice = (prizesData[i].weight / totalWeight) < 0.05;
+        ctx.font = isSmallSlice ? "bold 12px sans-serif" : "bold 16px sans-serif";
+        
+        ctx.fillText(prizesData[i].name, radius - 20, 5);
+        ctx.restore();
+
+        // 把起始角度往前推，準備畫下一個扇形
+        currentAngle += sliceAngle;
+    }
+}
+
+drawWheel();
+
+// 2. 真實物理抽獎邏輯
+spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+    resultDiv.textContent = "";
+
+    // 這次沒有黑箱演算法了，直接給一個「完全隨機」的角度
+    const baseSpins = 5 * 360; // 基礎 5 圈
+    const randomDegree = Math.floor(Math.random() * 360); // 0~359 度的隨機落點
+    const totalRotateDegree = baseSpins + randomDegree;
+
+    currentRotation += totalRotateDegree;
+
+    // 套用 CSS 動畫
+    canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+    // 動畫結束後，看指針落在哪個扇形
+    setTimeout(() => {
+        isSpinning = false;
+        spinBtn.disabled = false;
+
+        // 算出目前指標(正上方 270 度)對應到轉盤原本的哪個角度
+        let pointerAngle = (270 - (currentRotation % 360)) % 360;
+        if (pointerAngle < 0) pointerAngle += 360;
+
+        // 尋找這個角度屬於哪個獎項的範圍
+        let currentDegreeCheck = 0;
+        let winningIndex = -1;
+
+        for (let i = 0; i < prizesData.length; i++) {
+            // 計算這個獎項佔據的度數 (0~360)
+            const sliceDegree = (prizesData[i].weight / totalWeight) * 360;
+            
+            // 如果指針角度落在這個扇形的度數範圍內
+            if (pointerAngle >= currentDegreeCheck && pointerAngle < currentDegreeCheck + sliceDegree) {
+                winningIndex = i;
+                break; // 找到了就停止尋找
+            }
+            
+            // 沒找到，把檢查點往前推
+            currentDegreeCheck += sliceDegree;
+        }
+
+        resultDiv.textContent = `🎉 恭喜獲得：${prizesData[winningIndex].name}`;
+    }, 4000);
+});
+    </script>
+</body>
+</html>
