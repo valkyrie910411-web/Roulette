@@ -160,4 +160,20 @@
               let currentDegreeCheck = 0;
               let winningIndex = -1;
 
-              for (let i = 0
+              for (let i = 0; i < prizesData.length; i++) {
+                  const sliceDegree = (prizesData[i].weight / totalWeight) * 360;
+                  
+                  if (pointerAngle >= currentDegreeCheck && pointerAngle < currentDegreeCheck + sliceDegree) {
+                      winningIndex = i;
+                      break;
+                  }
+                  
+                  currentDegreeCheck += sliceDegree;
+              }
+
+              resultDiv.textContent = `🎉 恭喜獲得：${prizesData[winningIndex].name}`;
+          }, 4000);
+      });
+    </script>
+</body>
+</html>
