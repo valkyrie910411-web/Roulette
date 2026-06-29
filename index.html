@@ -14,28 +14,71 @@
             min-height: 100vh;
             background-color: #f5f5f5;
             margin: 0;
+            overflow-x: hidden; /* 防止按鈕造成橫向捲軸 */
         }
 
-       .wheel-wrapper {
-    position: relative;
-    width: 600px;  /* 從 400px 改為 600px */
-    height: 600px; /* 從 400px 改為 600px */
-    margin-bottom: 40px;
-}
+        /* 階段標題 */
+        #stageTitle {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
 
-/* 轉盤頂部的指標也跟著放大 */
-.pointer {
-    position: absolute;
-    top: -20px; /* 稍微往上拉一點 */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;  /* 從 15px 變 20px */
-    border-right: 20px solid transparent; /* 從 15px 變 20px */
-    border-top: 40px solid #ff4d4d;       /* 從 30px 變 40px */
-    z-index: 10;
-}
+        /* 兩側的切換按鈕 */
+        .nav-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.08);
+            border: none;
+            font-size: 2.5rem;
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: #555;
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+            color: #111;
+        }
+
+        #prevBtn {
+            left: 30px;
+            display: none; /* 預設在第一階段，隱藏左箭頭 */
+        }
+
+        #nextBtn {
+            right: 30px;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin-bottom: 40px;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #ff4d4d;
+            z-index: 10;
+        }
 
         canvas {
             border-radius: 50%;
@@ -43,7 +86,7 @@
             transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
-        button {
+        button.spin-btn {
             padding: 12px 30px;
             font-size: 18px;
             color: #fff;
@@ -55,11 +98,11 @@
             letter-spacing: 2px;
         }
 
-        button:hover {
+        button.spin-btn:hover {
             background-color: #555;
         }
 
-        button:disabled {
+        button.spin-btn:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
@@ -75,12 +118,17 @@
 </head>
 <body>
 
+    <button id="prevBtn" class="nav-btn">❮</button>
+    <button id="nextBtn" class="nav-btn">❯</button>
+
+    <div id="stageTitle">第一階段</div>
+
     <div class="wheel-wrapper">
         <div class="pointer"></div>
         <canvas id="wheelCanvas" width="600" height="600"></canvas>
     </div>
     
-    <button id="spinBtn">開始旋轉</button>
+    <button id="spinBtn" class="spin-btn">開始旋轉</button>
     <div id="result"></div>
 
     <script>
@@ -88,32 +136,58 @@
       const ctx = canvas.getContext('2d');
       const spinBtn = document.getElementById('spinBtn');
       const resultDiv = document.getElementById('result');
+      const stageTitle = document.getElementById('stageTitle');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
 
-      const prizesData = [
-          { name: "SUPER 72/1錠", weight: 20, color: "#FFB6C1" },
-          { name: "心跳蔓越莓", weight: 20, color: "#FFDAB9" },
-          { name: "折扣$100", weight: 20, color: "#E6E6FA" },
-          { name: "折扣$200", weight: 20, color: "#ADD8E6" },
-          { name: "銘謝惠顧", weight: 20, color: "#D3D3D3" }
+      // 定義兩個階段的資料
+      const stagesData = [
+          {
+              title: "第一階段",
+              prizes: [
+                  { name: "SUPER 72/1錠", weight: 20, color: "#FFB6C1" },
+                  { name: "心跳蔓越莓", weight: 20, color: "#FFDAB9" },
+                  { name: "折扣$100", weight: 20, color: "#E6E6FA" },
+                  { name: "折扣$200", weight: 20, color: "#ADD8E6" },
+                  { name: "銘謝惠顧", weight: 20, color: "#D3D3D3" }
+              ]
+          },
+          {
+              title: "第二階段",
+              prizes: [
+                  { name: "300元", weight: 10, color: "#FFB6C1" },
+                  { name: "400元", weight: 10, color: "#FFDAB9" },
+                  { name: "500元", weight: 10, color: "#E6E6FA" },
+                  { name: "飛機杯1入", weight: 10, color: "#ADD8E6" },
+                  { name: "SUPER72一盒", weight: 10, color: "#98FB98" }, // 淺綠
+                  { name: "買一送二", weight: 10, color: "#F0E68C" },   // 卡其黃
+                  { name: "整筆免單", weight: 10, color: "#D3D3D3" }    // 灰
+              ]
+          }
       ];
 
-      const totalWeight = prizesData.reduce((sum, prize) => sum + prize.weight, 0);
-
+      let currentStageIndex = 0; // 0代表第一階段, 1代表第二階段
+      let currentRotation = 0;
+      let isSpinning = false;
+      
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = canvas.width / 2;
 
-      let currentRotation = 0;
-      let isSpinning = false;
-
+      // 繪製目前階段的轉盤
       function drawWheel() {
+          const currentStage = stagesData[currentStageIndex];
+          const totalWeight = currentStage.prizes.reduce((sum, prize) => sum + prize.weight, 0);
+          
+          // 清空畫布
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
           let currentAngle = 0;
 
-          for (let i = 0; i < prizesData.length; i++) {
-              const sliceAngle = (prizesData[i].weight / totalWeight) * 2 * Math.PI;
+          for (let i = 0; i < currentStage.prizes.length; i++) {
+              const sliceAngle = (currentStage.prizes[i].weight / totalWeight) * 2 * Math.PI;
 
               ctx.beginPath();
-              ctx.fillStyle = prizesData[i].color;
+              ctx.fillStyle = currentStage.prizes[i].color;
               ctx.moveTo(centerX, centerY);
               ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
               ctx.lineTo(centerX, centerY);
@@ -125,20 +199,50 @@
               ctx.textAlign = "right";
               ctx.fillStyle = "#333";
               
-             const isSmallSlice = (prizesData[i].weight / totalWeight) < 0.05;
-ctx.font = isSmallSlice ? "bold 18px sans-serif" : "bold 24px sans-serif";
-
-// 調整文字位置：radius - 30 讓字稍微遠離邊緣，8 讓字對齊中央
-ctx.fillText(prizesData[i].name, radius - 30, 8);
-
-ctx.restore();
+              // 動態調整字體大小，如果項目超過 5 個 (第二階段) 就自動縮小字體以防超出邊界
+              const isSmallSlice = (currentStage.prizes[i].weight / totalWeight) < 0.05;
+              const isManySlices = currentStage.prizes.length > 5;
+              ctx.font = (isSmallSlice || isManySlices) ? "bold 18px sans-serif" : "bold 24px sans-serif";
+              
+              ctx.fillText(currentStage.prizes[i].name, radius - 30, 8);
+              ctx.restore();
 
               currentAngle += sliceAngle;
           }
       }
 
-      drawWheel();
+      // 切換階段的共用邏輯
+      function switchStage(index) {
+          if (isSpinning) return; // 旋轉中不允許切換
 
+          currentStageIndex = index;
+          stageTitle.textContent = stagesData[currentStageIndex].title;
+          resultDiv.textContent = "";
+
+          // 重置轉盤角度與動畫，避免切換時出現奇怪的旋轉
+          canvas.style.transition = 'none';
+          currentRotation = 0;
+          canvas.style.transform = `rotate(0deg)`;
+          
+          // 強制瀏覽器重繪 (Reflow)，讓移除動畫的設定立即生效
+          void canvas.offsetHeight; 
+          
+          // 加回動畫設定
+          canvas.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
+
+          // 重新繪製轉盤
+          drawWheel();
+
+          // 控制左右按鈕的顯示狀態
+          prevBtn.style.display = currentStageIndex === 0 ? 'none' : 'flex';
+          nextBtn.style.display = currentStageIndex === stagesData.length - 1 ? 'none' : 'flex';
+      }
+
+      // 按鈕事件監聽
+      prevBtn.addEventListener('click', () => switchStage(0));
+      nextBtn.addEventListener('click', () => switchStage(1));
+
+      // 抽獎邏輯
       spinBtn.addEventListener('click', () => {
           if (isSpinning) return;
           isSpinning = true;
@@ -150,7 +254,6 @@ ctx.restore();
           const totalRotateDegree = baseSpins + randomDegree;
 
           currentRotation += totalRotateDegree;
-
           canvas.style.transform = `rotate(${currentRotation}deg)`;
 
           setTimeout(() => {
@@ -160,11 +263,14 @@ ctx.restore();
               let pointerAngle = (270 - (currentRotation % 360)) % 360;
               if (pointerAngle < 0) pointerAngle += 360;
 
+              const currentStage = stagesData[currentStageIndex];
+              const totalWeight = currentStage.prizes.reduce((sum, prize) => sum + prize.weight, 0);
+
               let currentDegreeCheck = 0;
               let winningIndex = -1;
 
-              for (let i = 0; i < prizesData.length; i++) {
-                  const sliceDegree = (prizesData[i].weight / totalWeight) * 360;
+              for (let i = 0; i < currentStage.prizes.length; i++) {
+                  const sliceDegree = (currentStage.prizes[i].weight / totalWeight) * 360;
                   
                   if (pointerAngle >= currentDegreeCheck && pointerAngle < currentDegreeCheck + sliceDegree) {
                       winningIndex = i;
@@ -174,9 +280,13 @@ ctx.restore();
                   currentDegreeCheck += sliceDegree;
               }
 
-              resultDiv.textContent = `🎉 恭喜獲得：${prizesData[winningIndex].name}`;
+              resultDiv.textContent = `🎉 恭喜獲得：${currentStage.prizes[winningIndex].name}`;
           }, 4000);
       });
+
+      // 初始化第一階段
+      drawWheel();
+
     </script>
 </body>
 </html>
