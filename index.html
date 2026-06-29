@@ -12,7 +12,8 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #2B2B2B;
+            /* 1. 背景改為深灰色 */
+            background-color: #2b2b2b; 
             margin: 0;
             overflow-x: hidden;
         }
@@ -20,7 +21,8 @@
         #stageTitle {
             font-size: 32px;
             font-weight: bold;
-            color: #333;
+            /* 2. 標題改為白色 */
+            color: #ffffff; 
             margin-bottom: 20px;
             letter-spacing: 2px;
             transition: opacity 0.3s ease;
@@ -31,14 +33,15 @@
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.08);
+            /* 3. 按鈕改為半透明白色 */
+            background: rgba(255, 255, 255, 0.1); 
             border: none;
             font-size: 2.5rem;
             cursor: pointer;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            color: #555;
+            color: #ccc; /* 箭頭顏色改為淺灰 */
             transition: all 0.3s ease;
             z-index: 100;
             display: flex;
@@ -47,14 +50,15 @@
         }
 
         .nav-btn:hover {
-            background: rgba(0, 0, 0, 0.2);
-            color: #111;
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff; /* 懸停時箭頭變純白 */
         }
 
         .nav-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.05);
+            color: #555;
         }
 
         #prevBtn { left: 30px; display: none; }
@@ -98,8 +102,8 @@
 
         canvas {
             border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            /* 旋轉動畫 */
+            /* 調整陰影讓轉盤在深色背景上更有立體感 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
             transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
@@ -107,25 +111,30 @@
             padding: 12px 30px;
             font-size: 18px;
             color: #fff;
-            background-color: #333;
+            /* 4. 主按鈕調亮一點，避免跟深灰背景融為一體 */
+            background-color: #444; 
             border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: background-color 0.3s;
             letter-spacing: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        button.spin-btn:hover { background-color: #555; }
+        button.spin-btn:hover { background-color: #666; }
         button.spin-btn:disabled {
-            background-color: #ccc;
+            background-color: #222;
+            color: #666;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
         #result {
             margin-top: 20px;
             font-size: 22px;
             font-weight: bold;
-            color: #333;
+            /* 5. 結果文字改為純白色 */
+            color: #ffffff; 
             min-height: 30px;
             text-align: center;
         }
@@ -162,7 +171,6 @@
       const nextBtn = document.getElementById('nextBtn');
       const sliderTrack = document.getElementById('sliderTrack');
 
-      // 取得兩個畫布
       const canvases = [
           document.getElementById('canvas0'),
           document.getElementById('canvas1')
@@ -172,7 +180,6 @@
           canvases[1].getContext('2d')
       ];
 
-      // 定義獎項與機率 (Weight)
       const stagesData = [
           {
               title: "第一階段",
@@ -186,25 +193,21 @@
           },
           {
               title: "第二階段",
-              // 總權重設定為 100，方便直接對應百分比
               prizes: [
-                  { name: "9折", weight: 48, color: "#D3D3D3" },          // 佔 45% (普獎)
-                  { name: "8折", weight: 40, color: "#E6E6FA" },          // 佔 32%
-                  { name: "飛機杯", weight: 5, color: "#FFDAB9" },        // 佔 12%
-                  { name: "SUPER 72", weight: 3, color: "#98FB98" },      // 佔 5%
-                  { name: "買一送二", weight: 3, color: "#FFB6C1" },        // 佔 5%
-                  { name: "整筆免單", weight: 1, color: "#FFD700" }         // 佔 1% (大獎)
+                  { name: "9折", weight: 48, color: "#D3D3D3" },
+                  { name: "8折", weight: 40, color: "#E6E6FA" },
+                  { name: "飛機杯", weight: 5, color: "#FFDAB9" },
+                  { name: "SUPER 72", weight: 3, color: "#98FB98" },
+                  { name: "買一送二", weight: 3, color: "#FFB6C1" },
+                  { name: "整筆免單", weight: 1, color: "#FFD700" }
               ]
           }
       ];
 
       let currentStageIndex = 0; 
       let isSpinning = false;
-      
-      // 記錄兩個轉盤各自累積的旋轉角度，避免切換回來時角度重置
       let currentRotations = [0, 0];
 
-      // 繪製「均分」的黑箱轉盤
       function drawEqualWheel(stageIndex) {
           const ctx = contexts[stageIndex];
           const canvas = canvases[stageIndex];
@@ -219,7 +222,6 @@
           for (let i = 0; i < numSlices; i++) {
               const angle = i * sliceAngle;
 
-              // 畫扇形 (每個面積都一樣大)
               ctx.beginPath();
               ctx.fillStyle = prizes[i].color;
               ctx.moveTo(centerX, centerY);
@@ -227,14 +229,13 @@
               ctx.lineTo(centerX, centerY);
               ctx.fill();
 
-              // 畫文字
               ctx.save();
               ctx.translate(centerX, centerY);
               ctx.rotate(angle + sliceAngle / 2);
               ctx.textAlign = "right";
+              /* 轉盤內的文字維持深色，因為底色是淺色扇形 */
               ctx.fillStyle = "#333";
               
-              // 依據字數動態調整大小
               const isManySlices = numSlices > 5;
               ctx.font = isManySlices ? "bold 20px sans-serif" : "bold 24px sans-serif";
               
@@ -243,11 +244,9 @@
           }
       }
 
-      // 初始化畫出兩個轉盤
       drawEqualWheel(0);
       drawEqualWheel(1);
 
-      // 加權隨機演算法 (黑箱核心)
       function getWeightedRandomIndex(prizes) {
           const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
           let randomNum = Math.random() * totalWeight;
@@ -261,13 +260,11 @@
           return prizes.length - 1;
       }
 
-      // 執行滑動切換
       function slideToStage(index) {
           if (isSpinning) return;
 
           currentStageIndex = index;
           
-          // 更新標題 (加入淡入淡出效果)
           stageTitle.style.opacity = 0;
           setTimeout(() => {
               stageTitle.textContent = stagesData[currentStageIndex].title;
@@ -276,11 +273,9 @@
 
           resultDiv.textContent = "";
 
-          // 移動軌道 (0% 顯示第一個，-50% 顯示第二個)
           const translateX = currentStageIndex * -50;
           sliderTrack.style.transform = `translateX(${translateX}%)`;
 
-          // 更新按鈕顯示狀態
           prevBtn.style.display = currentStageIndex === 0 ? 'none' : 'flex';
           nextBtn.style.display = currentStageIndex === stagesData.length - 1 ? 'none' : 'flex';
       }
@@ -288,12 +283,11 @@
       prevBtn.addEventListener('click', () => slideToStage(0));
       nextBtn.addEventListener('click', () => slideToStage(1));
 
-      // 點擊抽獎
       spinBtn.addEventListener('click', () => {
           if (isSpinning) return;
           isSpinning = true;
           spinBtn.disabled = true;
-          prevBtn.disabled = true; // 旋轉時鎖定切換按鈕
+          prevBtn.disabled = true;
           nextBtn.disabled = true;
           resultDiv.textContent = "";
 
@@ -302,23 +296,16 @@
           const sliceDegree = 360 / numSlices;
           const canvas = canvases[currentStageIndex];
 
-          // 1. 黑箱決定中獎項目
           const winningIndex = getWeightedRandomIndex(prizes);
 
-          // 2. 計算轉盤必須停在哪個角度
-          // 算出該獎項的圓心角度
           const targetCenterAngle = (winningIndex * sliceDegree) + (sliceDegree / 2);
           
-          // 計算需要旋轉多少度才能對齊正上方(270度)
           let targetRotation = 270 - targetCenterAngle;
           if (targetRotation < 0) targetRotation += 360;
 
-          // 加入隨機偏移，讓每次停下的位置不完全在扇形正中央 (看起來更自然)
-          // 偏移量設定在扇形寬度的 80% 以內，確保不會超出邊界
           const randomOffset = (Math.random() * (sliceDegree * 0.8)) - (sliceDegree * 0.4);
           targetRotation += randomOffset;
 
-          // 3. 加上基礎圈數 (5圈)
           const baseSpins = 5 * 360;
           const currentMod = currentRotations[currentStageIndex] % 360;
           
@@ -328,10 +315,8 @@
           const totalRotateDegree = baseSpins + degreeToRotate;
           currentRotations[currentStageIndex] += totalRotateDegree;
 
-          // 執行旋轉
           canvas.style.transform = `rotate(${currentRotations[currentStageIndex]}deg)`;
 
-          // 顯示結果
           setTimeout(() => {
               isSpinning = false;
               spinBtn.disabled = false;
