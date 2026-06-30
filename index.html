@@ -22,24 +22,24 @@
             background-attachment: fixed;
         }
 
-        /* 轉盤專用的上下漂浮動畫 */
-        @keyframes wheelFloat {
+        /* 統一的同步漂浮動畫 */
+        @keyframes syncFloat {
             0% { transform: translateX(-50%) translateY(0px); }
             50% { transform: translateX(-50%) translateY(-12px); }
             100% { transform: translateX(-50%) translateY(0px); }
         }
 
-        /* 頂部文字區塊：移除漂浮動畫，使其靜止固定 */
         .header-section {
             position: fixed;
             top: 8vh; 
             left: 50%;
-            transform: translateX(-50%); /* 保持完美水平置中 */
+            transform: translateX(-50%);
             width: 90%;
             z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: syncFloat 4s ease-in-out infinite;
         }
 
         #stageTitle {
@@ -100,7 +100,6 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 轉盤主容器：持續保持上下漂浮 */
         .slider-viewport {
             width: 600px;
             height: 600px;
@@ -108,7 +107,7 @@
             bottom: -180px; 
             left: 50%;
             z-index: 10;
-            animation: wheelFloat 4s ease-in-out infinite;
+            animation: syncFloat 4s ease-in-out infinite;
         }
 
         .slider-track {
@@ -126,9 +125,11 @@
             justify-content: center;
         }
 
+        /* 畫布寬高完全交給容器控制，確保縮放比例完美 */
         canvas {
-            width: 600px;
-            height: 600px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box; /* 確保邊框不會擠壓變形 */
             border-radius: 50%;
             border: 8px solid #ffffff; 
             background-color: #fff;
@@ -148,6 +149,7 @@
             border-top: 45px solid #f68720; 
             z-index: 30;
             filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4)); 
+            transition: all 0.3s ease;
         }
 
         #spinBtn {
@@ -168,7 +170,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             letter-spacing: 2px;
             padding-left: 2px;
             font-family: inherit; 
@@ -207,19 +209,40 @@
 
         /* =========================================
            2. 平板直式專屬設定 (Tablet Portrait)
+           完全捨棄 transform: scale()，改用原生真實解析度！
            ========================================= */
         @media (min-width: 768px) and (orientation: portrait) {
             .header-section {
-                top: 10vh; /* 靜止固定於上方 10vh */
+                top: 10vh; 
             }
             #stageTitle { font-size: 72px; }
             #result { font-size: 42px; min-height: 120px; }
 
+            /* 容器原生放大至 840px (原本的 1.4 倍)，保證極致清晰 */
             .slider-viewport {
-                bottom: -240px; 
-                transform-origin: bottom center; 
-                /* 平板直式下，轉盤放大 1.4 倍並維持漂浮 */
+                width: 840px; 
+                height: 840px;
+                bottom: -252px; 
                 animation: tabletFloat 4s ease-in-out infinite;
+            }
+            .wheel-stage { 
+                width: 840px; 
+                height: 840px; 
+            }
+            canvas { border-width: 11px; }
+
+            /* 指針與按鈕同步原生放大 */
+            .pointer {
+                top: -28px;
+                border-left-width: 28px;
+                border-right-width: 28px;
+                border-top-width: 63px;
+            }
+            #spinBtn {
+                width: 168px; 
+                height: 168px; 
+                border-width: 8px; 
+                font-size: 39px;
             }
 
             .nav-btn {
@@ -230,10 +253,11 @@
             #nextBtn { right: 40px; }
         }
 
+        /* 專屬平板的漂浮幅度 (不使用 scale) */
         @keyframes tabletFloat {
-            0% { transform: translateX(-50%) scale(1.4) translateY(0px); }
-            50% { transform: translateX(-50%) scale(1.4) translateY(-10px); }
-            100% { transform: translateX(-50%) scale(1.4) translateY(0px); }
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-16px); }
+            100% { transform: translateX(-50%) translateY(0px); }
         }
 
 
@@ -242,15 +266,14 @@
            ========================================= */
         @media (min-width: 768px) and (orientation: landscape) {
             .header-section {
-                top: 15vh; /* 靜止固定於上方 15vh */
+                top: 15vh; 
             }
             #stageTitle { font-size: 64px; }
             #result { font-size: 38px; min-height: 100px; }
 
             .slider-viewport {
                 bottom: -100px; 
-                /* 電腦端下，轉盤 1:1 實體大小並維持漂浮 */
-                animation: wheelFloat 4s ease-in-out infinite; 
+                animation: syncFloat 4s ease-in-out infinite; 
             }
 
             .nav-btn {
@@ -332,10 +355,13 @@
       let isSpinning = false;
       let currentRotations = [0, 0];
 
+      // 將所有轉盤一律以最高畫質 (840px 基準) 進行底層渲染
       function setupHighDPIProperties(canvas, ctx) {
           const dpr = window.devicePixelRatio || 1;
-          canvas.width = 600 * dpr;
-          canvas.height = 600 * dpr;
+          const maxLogicalSize = 840; 
+          
+          canvas.width = maxLogicalSize * dpr;
+          canvas.height = maxLogicalSize * dpr;
           ctx.scale(dpr, dpr);
       }
 
@@ -348,9 +374,10 @@
           const numSlices = prizes.length;
           const sliceAngle = (2 * Math.PI) / numSlices;
           
-          const centerX = 300;
-          const centerY = 300;
-          const radius = 300;
+          // 在 840px 的大畫布裡尋找中心點
+          const centerX = 420;
+          const centerY = 420;
+          const radius = 420;
 
           const fontConfig = "'華康黑體', 'DFHei', 'DFHei-Bold', 'DFLiHei-W5', 'Microsoft JhengHei', sans-serif";
 
@@ -371,9 +398,11 @@
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
-              ctx.font = isManySlices ? `bold 18px ${fontConfig}` : `bold 22px ${fontConfig}`;
+              // 字體同步等比放大渲染
+              ctx.font = isManySlices ? `bold 25px ${fontConfig}` : `bold 31px ${fontConfig}`;
               
-              ctx.fillText(prizes[i].name, radius - 35, 8);
+              // 文字位置等比往外推
+              ctx.fillText(prizes[i].name, radius - 49, 11);
               ctx.restore();
           }
       }
