@@ -205,19 +205,17 @@
 
         /* =========================================
            2. 平板直式專屬設定 (Tablet Portrait)
-           解鎖平板上的距離過遠與比例太小問題
            ========================================= */
         @media (min-width: 768px) and (orientation: portrait) {
             .header-section {
-                top: 20vh; /* 將文字往下壓，大幅縮小跟轉盤的間距 */
+                top: 10vh; /* 已經將文字往上拉高 */
             }
             #stageTitle { font-size: 72px; }
             #result { font-size: 42px; min-height: 120px; }
 
             .slider-viewport {
                 bottom: -240px; 
-                transform-origin: bottom center; /* 確保放大時緊貼螢幕底部 */
-                /* 放大 1.4 倍，讓平板也能滿版，因為平板是 Retina 螢幕，絕不模糊 */
+                transform-origin: bottom center; 
                 animation: tabletFloat 4s ease-in-out infinite;
             }
 
@@ -229,7 +227,6 @@
             #nextBtn { right: 40px; }
         }
 
-        /* 平板專屬的放大版漂浮動畫 */
         @keyframes tabletFloat {
             0% { transform: translateX(-50%) scale(1.4) translateY(0px); }
             50% { transform: translateX(-50%) scale(1.4) translateY(-10px); }
@@ -239,17 +236,16 @@
 
         /* =========================================
            3. 電腦端 / 平板橫屏專屬設定 (PC / Landscape)
-           確保大尺寸寬螢幕排版精緻且不模糊
            ========================================= */
         @media (min-width: 768px) and (orientation: landscape) {
             .header-section {
-                top: 15vh; /* 文字往下壓一點點 */
+                top: 15vh; 
             }
             #stageTitle { font-size: 64px; }
             #result { font-size: 38px; min-height: 100px; }
 
             .slider-viewport {
-                bottom: -100px; /* 將轉盤往上拉起，填補中間的空洞 */
+                bottom: -100px; 
                 animation: syncFloat 4s ease-in-out infinite; 
             }
 
@@ -310,156 +306,4 @@
               prizes: [
                   { name: "100元折價券", weight: 20, color: "#0b6170" },
                   { name: "女優拍照", weight: 30, color: "#114d5e" },
-                  { name: "銘謝惠顧", weight: 0, color: "#0b6170" },
-                  { name: "心跳蔓越莓一錠", weight: 30, color: "#114d5e" },
-                  { name: "Super72 一錠", weight: 20, color: "#084c59" } 
-              ]
-          },
-          {
-              title: "老司機轉盤",
-              prizes: [
-                  { name: "8折官網折價券", weight: 48, color: "#0b6170" },
-                  { name: "7折官網折價券", weight: 38, color: "#114d5e" },
-                  { name: "200元折價券", weight: 5, color: "#0b6170" },
-                  { name: "飛機杯一入", weight: 5, color: "#114d5e" },
-                  { name: "Super72 一盒", weight: 3, color: "#0b6170" },
-                  { name: "全單折抵免單券", weight: 1, color: "#f68720" }  
-              ]
-          }
-      ];
-
-      let currentStageIndex = 0; 
-      let isSpinning = false;
-      let currentRotations = [0, 0];
-
-      function setupHighDPIProperties(canvas, ctx) {
-          const dpr = window.devicePixelRatio || 1;
-          canvas.width = 600 * dpr;
-          canvas.height = 600 * dpr;
-          ctx.scale(dpr, dpr);
-      }
-
-      setupHighDPIProperties(canvases[0], contexts[0]);
-      setupHighDPIProperties(canvases[1], contexts[1]);
-
-      function drawEqualWheel(stageIndex) {
-          const ctx = contexts[stageIndex];
-          const prizes = stagesData[stageIndex].prizes;
-          const numSlices = prizes.length;
-          const sliceAngle = (2 * Math.PI) / numSlices;
-          
-          const centerX = 300;
-          const centerY = 300;
-          const radius = 300;
-
-          const fontConfig = "'華康黑體', 'DFHei', 'DFHei-Bold', 'DFLiHei-W5', 'Microsoft JhengHei', sans-serif";
-
-          for (let i = 0; i < numSlices; i++) {
-              const angle = i * sliceAngle;
-
-              ctx.beginPath();
-              ctx.fillStyle = prizes[i].color;
-              ctx.moveTo(centerX, centerY);
-              ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
-              ctx.lineTo(centerX, centerY);
-              ctx.fill();
-
-              ctx.save();
-              ctx.translate(centerX, centerY);
-              ctx.rotate(angle + sliceAngle / 2);
-              ctx.textAlign = "right";
-              ctx.fillStyle = "#ffffff"; 
-              
-              const isManySlices = numSlices > 5;
-              ctx.font = isManySlices ? `bold 18px ${fontConfig}` : `bold 22px ${fontConfig}`;
-              
-              ctx.fillText(prizes[i].name, radius - 35, 8);
-              ctx.restore();
-          }
-      }
-
-      drawEqualWheel(0);
-      drawEqualWheel(1);
-
-      function getWeightedRandomIndex(prizes) {
-          const totalWeight = prizes.reduce((sum, prize) => sum + prize.weight, 0);
-          let randomNum = Math.random() * totalWeight;
-          
-          for (let i = 0; i < prizes.length; i++) {
-              if (randomNum < prizes[i].weight) {
-                  return i;
-              }
-              randomNum -= prizes[i].weight;
-          }
-          return prizes.length - 1;
-      }
-
-      function slideToStage(index) {
-          if (isSpinning) return;
-
-          currentStageIndex = index;
-          
-          stageTitle.style.opacity = 0;
-          setTimeout(() => {
-              stageTitle.textContent = stagesData[currentStageIndex].title;
-              stageTitle.style.opacity = 1;
-          }, 150);
-
-          resultDiv.innerHTML = "";
-
-          const translateX = currentStageIndex * -50;
-          sliderTrack.style.transform = `translateX(${translateX}%)`;
-
-          prevBtn.style.display = currentStageIndex === 0 ? 'none' : 'flex';
-          nextBtn.style.display = currentStageIndex === stagesData.length - 1 ? 'none' : 'flex';
-      }
-
-      prevBtn.addEventListener('click', () => slideToStage(0));
-      nextBtn.addEventListener('click', () => slideToStage(1));
-
-      spinBtn.addEventListener('click', () => {
-          if (isSpinning) return;
-          isSpinning = true;
-          spinBtn.disabled = true;
-          prevBtn.disabled = true;
-          nextBtn.disabled = true;
-          resultDiv.innerHTML = "";
-
-          const prizes = stagesData[currentStageIndex].prizes;
-          const numSlices = prizes.length;
-          const sliceDegree = 360 / numSlices;
-          const canvas = canvases[currentStageIndex];
-
-          const winningIndex = getWeightedRandomIndex(prizes);
-
-          const targetCenterAngle = (winningIndex * sliceDegree) + (sliceDegree / 2);
-          
-          let targetRotation = 270 - targetCenterAngle;
-          if (targetRotation < 0) targetRotation += 360;
-
-          const randomOffset = (Math.random() * (sliceDegree * 0.8)) - (sliceDegree * 0.4);
-          targetRotation += randomOffset;
-
-          const baseSpins = 5 * 360;
-          const currentMod = currentRotations[currentStageIndex] % 360;
-          
-          let degreeToRotate = targetRotation - currentMod;
-          if (degreeToRotate < 0) degreeToRotate += 360;
-
-          const totalRotateDegree = baseSpins + degreeToRotate;
-          currentRotations[currentStageIndex] += totalRotateDegree;
-
-          canvas.style.transform = `rotate(${currentRotations[currentStageIndex]}deg)`;
-
-          setTimeout(() => {
-              isSpinning = false;
-              spinBtn.disabled = false;
-              prevBtn.disabled = false;
-              nextBtn.disabled = false;
-              
-              resultDiv.innerHTML = `🎉 恭喜獲得<br><span class="prize-highlight">${prizes[winningIndex].name}</span>`;
-          }, 4000);
-      });
-    </script>
-</body>
-</html>
+                  { name: "
