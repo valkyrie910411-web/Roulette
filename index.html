@@ -7,36 +7,57 @@
     <style>
         body {
             font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
             margin: 0;
-            overflow-x: hidden;
-            
-            /* 1. 全新漸層背景：放射漸層疊加在線性漸層之上 */
+            padding: 0;
+            /* 隱藏超出畫面的部分，防止上下左右滑動 */
+            overflow: hidden; 
+            height: 100vh;
             background: 
                 radial-gradient(circle at top left, #ec8427 0%, rgba(255, 255, 255, 0) 60%),
                 radial-gradient(circle at bottom right, #ec8427 0%, rgba(255, 255, 255, 0) 60%),
                 linear-gradient(50.35deg, #114d5e, #1f9273, #3fa0b1, #2dffc6);
-            background-attachment: fixed; /* 讓背景固定，畫面更乾淨 */
+            background-attachment: fixed;
+        }
+
+        /* 頂部文字區塊：固定在畫面上半部 */
+        .header-section {
+            position: fixed;
+            top: 12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 90%;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #stageTitle {
-            font-size: 32px;
+            font-size: 54px; /* 標題字號放大 */
             font-weight: bold;
             color: #ffffff; 
-            margin-bottom: 20px;
-            letter-spacing: 2px;
+            margin-bottom: 15px;
+            letter-spacing: 4px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
             transition: opacity 0.3s ease;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3); /* 幫標題加點陰影，在複雜背景上更清楚 */
         }
 
+        #result {
+            font-size: 32px; /* 結果字號放大 */
+            font-weight: bold;
+            color: #ffffff; 
+            min-height: 45px;
+            text-align: center;
+            /* 讓結果文字有橘色光暈，更加亮眼 */
+            text-shadow: 0 0 15px #f68720, 0 2px 5px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        /* 兩側切換按鈕：移到下方與轉盤平齊 */
         .nav-btn {
             position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
+            bottom: 120px;
             background: rgba(255, 255, 255, 0.15); 
             border: none;
             font-size: 2.5rem;
@@ -50,132 +71,140 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px); /* 毛玻璃效果 */
+            backdrop-filter: blur(5px);
         }
 
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-50%) scale(1.1); /* 滑鼠游標靠近時微微放大 */
+            transform: scale(1.1);
         }
 
         .nav-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-50%) scale(1);
+            transform: scale(1);
         }
 
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
+        /* 轉盤主容器：固定在畫面最下方，讓下半部超出螢幕被隱藏 */
         .slider-viewport {
             width: 600px;
-            overflow: hidden;
-            margin-bottom: 40px;
-            position: relative;
-            /* 留白給外框和陰影，避免被容器切掉 */
-            padding: 20px; 
-            margin: -20px;
-            margin-bottom: 20px;
+            height: 600px;
+            position: fixed;
+            /* 轉盤半徑300，向下推240，代表中心點距離底部有60px，剛好完整顯示中間的按鈕 */
+            bottom: -240px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
         }
 
+        /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
             width: 200%;
+            height: 100%;
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .wheel-stage {
             width: 600px;
+            height: 600px;
             position: relative;
             display: flex;
             justify-content: center;
         }
 
+        canvas {
+            border-radius: 50%;
+            border: 8px solid #ffffff; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5); 
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            background-color: #fff;
+        }
+
+        /* 指針：拉出軌道外獨立定位，永遠在上方正中央 */
         .pointer {
             position: absolute;
-            top: -26px; /* 稍微往上微調，避開白色的粗邊框 */
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 40px solid #ff4d4d;
-            z-index: 10;
-            /* 幫指標加點陰影，讓立體感更好 */
-            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); 
+            /* 改為大獎橘色色號 */
+            border-top: 45px solid #f68720; 
+            z-index: 30;
+            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4)); 
         }
 
-        canvas {
-            border-radius: 50%;
-            /* 2. 轉盤的純白色筆畫外框 */
+        /* 圓形 Start 按鈕：絕對置中於轉盤 */
+        #spinBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background-color: #f68720; /* 大獎橘色色號 */
+            color: #ffffff;
+            /* 加上白色粗邊框，讓它跟轉盤完美隔開 */
             border: 6px solid #ffffff; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.4); 
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
-            background-color: #fff; /* 確保畫布底色是乾淨的 */
-        }
-
-        button.spin-btn {
-            padding: 15px 40px;
-            font-size: 20px;
+            border-radius: 50%;
+            font-size: 28px;
             font-weight: bold;
-            color: #114d5e;
-            background-color: #ffffff; /* 按鈕改成白色，搭配漸層底色更亮眼 */
-            border: none;
-            border-radius: 30px;
             cursor: pointer;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
             transition: all 0.3s;
             letter-spacing: 2px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding-left: 2px; /* 微調字元置中 */
         }
 
-        button.spin-btn:hover { 
-            background-color: #f0f0f0; 
-            transform: translateY(-2px);
+        #spinBtn:hover { 
+            background-color: #ff9933; 
+            transform: translate(-50%, -50%) scale(1.05);
         }
         
-        button.spin-btn:disabled {
-            background-color: rgba(255,255,255,0.3);
-            color: rgba(255,255,255,0.5);
+        #spinBtn:disabled {
+            background-color: #888;
+            border-color: #ccc;
             cursor: not-allowed;
             box-shadow: none;
-            transform: none;
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        #result {
-            margin-top: 25px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffffff; 
-            min-height: 35px;
-            text-align: center;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
 <body>
 
+    <div class="header-section">
+        <div id="stageTitle">見面禮轉盤</div>
+        <div id="result"></div>
+    </div>
+
     <button id="prevBtn" class="nav-btn">❮</button>
     <button id="nextBtn" class="nav-btn">❯</button>
 
-    <div id="stageTitle">見面禮轉盤</div>
-
     <div class="slider-viewport">
+        <div class="pointer"></div>
+        <button id="spinBtn">Start</button>
+        
         <div class="slider-track" id="sliderTrack">
             <div class="wheel-stage">
-                <div class="pointer"></div>
                 <canvas id="canvas0" width="600" height="600"></canvas>
             </div>
             <div class="wheel-stage">
-                <div class="pointer"></div>
                 <canvas id="canvas1" width="600" height="600"></canvas>
             </div>
         </div>
     </div>
-    
-    <button id="spinBtn" class="spin-btn">開始旋轉</button>
-    <div id="result"></div>
 
     <script>
       const spinBtn = document.getElementById('spinBtn');
@@ -247,14 +276,13 @@
               ctx.translate(centerX, centerY);
               ctx.rotate(angle + sliceAngle / 2);
               ctx.textAlign = "right";
-              
-              // 轉盤上的文字維持純白
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
               ctx.font = isManySlices ? "bold 18px sans-serif" : "bold 22px sans-serif";
               
-              ctx.fillText(prizes[i].name, radius - 30, 8);
+              // 微調文字位置，確保邊緣和內圈按鈕都不會擋到字
+              ctx.fillText(prizes[i].name, radius - 35, 8);
               ctx.restore();
           }
       }
