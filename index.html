@@ -26,7 +26,6 @@
             transition: opacity 0.3s ease;
         }
 
-        /* 兩側切換按鈕 */
         .nav-btn {
             position: fixed;
             top: 50%;
@@ -61,7 +60,6 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 滑動軌道容器 */
         .slider-viewport {
             width: 600px;
             overflow: hidden;
@@ -69,14 +67,12 @@
             position: relative;
         }
 
-        /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
             width: 200%;
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* 單一個轉盤的包裝 */
         .wheel-stage {
             width: 600px;
             position: relative;
@@ -139,7 +135,6 @@
     <button id="prevBtn" class="nav-btn">❮</button>
     <button id="nextBtn" class="nav-btn">❯</button>
 
-    <!-- 預設顯示第一階段的標題 -->
     <div id="stageTitle">見面禮轉盤</div>
 
     <div class="slider-viewport">
@@ -175,27 +170,28 @@
           canvases[1].getContext('2d')
       ];
 
-      // 更新後的獎項與機率設定
+      // 1. 在這裡設定轉盤扇形的顏色 (color)
       const stagesData = [
           {
               title: "見面禮轉盤",
               prizes: [
-                  { name: "100元折價券", weight: 20, color: "#D3D3D3" }, // 20%
-                  { name: "小模合照 一次", weight: 30, color: "#FFB6C1" },   // 30%
-                  { name: "銘謝惠顧", weight: 0, color: "#E6E6FA" },    // 0% (畫面上看得到，但抽不到)
-                  { name: "心跳蔓越莓 一錠", weight: 30, color: "#FFDAB9" }, // 30%
-                  { name: "Super72 一錠", weight: 20, color: "#98FB98" } // 20%
+                  { name: "100元折價券", weight: 20, color: "#0b6170" },
+                  { name: "女優拍照", weight: 30, color: "#114d5e" },
+                  { name: "銘謝惠顧", weight: 0, color: "#0b6170" },
+                  { name: "心跳蔓越莓一錠", weight: 30, color: "#114d5e" },
+                  // 備註：因為第一階段是奇數(5個)，頭尾顏色會相連，所以最後一個稍微調深一點點來做出區隔，改為 #084c59 (同色系較深)，若你想保持一模一樣可以改回 #0b6170
+                  { name: "Super72 一錠", weight: 20, color: "#084c59" } 
               ]
           },
           {
               title: "老司機轉盤",
               prizes: [
-                  { name: "8折官網折價券", weight: 48, color: "#E6E6FA" }, // 48%
-                  { name: "7折官網折價券", weight: 38, color: "#ADD8E6" }, // 38%
-                  { name: "200元折價券", weight: 5, color: "#D3D3D3" },    // 5%
-                  { name: "飛機杯 一入", weight: 5, color: "#FFDAB9" },    // 5%
-                  { name: "Super72 一盒", weight: 3, color: "#98FB98" },   // 3%
-                  { name: "全單折抵免單券", weight: 1, color: "#FFD700" }  // 1%
+                  { name: "8折官網折價券", weight: 48, color: "#0b6170" },
+                  { name: "7折官網折價券", weight: 38, color: "#114d5e" },
+                  { name: "200元折價券", weight: 5, color: "#0b6170" },
+                  { name: "飛機杯一入", weight: 5, color: "#114d5e" },
+                  { name: "Super72 一盒", weight: 3, color: "#0b6170" },
+                  { name: "全單折抵免單券", weight: 1, color: "#f68720" }  // 大獎專屬橘色
               ]
           }
       ];
@@ -229,9 +225,10 @@
               ctx.translate(centerX, centerY);
               ctx.rotate(angle + sliceAngle / 2);
               ctx.textAlign = "right";
-              ctx.fillStyle = "#333";
               
-              // 動態調整字體大小，字數較多時自動縮小
+              // 2. 在這裡將轉盤文字改為純白色
+              ctx.fillStyle = "#ffffff"; 
+              
               const isManySlices = numSlices > 5;
               ctx.font = isManySlices ? "bold 18px sans-serif" : "bold 22px sans-serif";
               
