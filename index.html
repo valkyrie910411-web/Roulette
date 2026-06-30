@@ -12,7 +12,6 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            /* 1. 背景改為深灰色 */
             background-color: #2b2b2b; 
             margin: 0;
             overflow-x: hidden;
@@ -21,7 +20,6 @@
         #stageTitle {
             font-size: 32px;
             font-weight: bold;
-            /* 2. 標題改為白色 */
             color: #ffffff; 
             margin-bottom: 20px;
             letter-spacing: 2px;
@@ -33,7 +31,6 @@
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            /* 3. 按鈕改為半透明白色 */
             background: rgba(255, 255, 255, 0.1); 
             border: none;
             font-size: 2.5rem;
@@ -41,7 +38,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            color: #ccc; /* 箭頭顏色改為淺灰 */
+            color: #ccc;
             transition: all 0.3s ease;
             z-index: 100;
             display: flex;
@@ -51,7 +48,7 @@
 
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.25);
-            color: #fff; /* 懸停時箭頭變純白 */
+            color: #fff;
         }
 
         .nav-btn:disabled {
@@ -64,7 +61,7 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 滑動軌道容器 (限制寬度，隱藏超出範圍的轉盤) */
+        /* 滑動軌道容器 */
         .slider-viewport {
             width: 600px;
             overflow: hidden;
@@ -75,8 +72,8 @@
         /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
-            width: 200%; /* 容納兩個 600px 的轉盤 (1200px) */
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* 平滑滑動動畫 */
+            width: 200%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         /* 單一個轉盤的包裝 */
@@ -102,7 +99,6 @@
 
         canvas {
             border-radius: 50%;
-            /* 調整陰影讓轉盤在深色背景上更有立體感 */
             box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
             transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
@@ -111,7 +107,6 @@
             padding: 12px 30px;
             font-size: 18px;
             color: #fff;
-            /* 4. 主按鈕調亮一點，避免跟深灰背景融為一體 */
             background-color: #444; 
             border: none;
             border-radius: 25px;
@@ -133,7 +128,6 @@
             margin-top: 20px;
             font-size: 22px;
             font-weight: bold;
-            /* 5. 結果文字改為純白色 */
             color: #ffffff; 
             min-height: 30px;
             text-align: center;
@@ -145,7 +139,8 @@
     <button id="prevBtn" class="nav-btn">❮</button>
     <button id="nextBtn" class="nav-btn">❯</button>
 
-    <div id="stageTitle">第一階段</div>
+    <!-- 預設顯示第一階段的標題 -->
+    <div id="stageTitle">見面禮轉盤</div>
 
     <div class="slider-viewport">
         <div class="slider-track" id="sliderTrack">
@@ -180,26 +175,27 @@
           canvases[1].getContext('2d')
       ];
 
+      // 更新後的獎項與機率設定
       const stagesData = [
           {
-              title: "第一階段",
+              title: "見面禮轉盤",
               prizes: [
-                  { name: "SUPER 72/1錠", weight: 20, color: "#FFB6C1" },
-                  { name: "心跳蔓越莓", weight: 30, color: "#FFDAB9" },
-                  { name: "折扣$100", weight: 30, color: "#E6E6FA" },
-                  { name: "折扣$200", weight: 20, color: "#ADD8E6" },
-                  { name: "銘謝惠顧", weight: 0, color: "#D3D3D3" }
+                  { name: "100元折價券", weight: 20, color: "#D3D3D3" }, // 20%
+                  { name: "女優拍照", weight: 30, color: "#FFB6C1" },   // 30%
+                  { name: "銘謝惠顧", weight: 0, color: "#E6E6FA" },    // 0% (畫面上看得到，但抽不到)
+                  { name: "心跳蔓越莓一錠", weight: 30, color: "#FFDAB9" }, // 30%
+                  { name: "Super72 一錠", weight: 20, color: "#98FB98" } // 20%
               ]
           },
           {
-              title: "第二階段",
+              title: "老司機轉盤",
               prizes: [
-                  { name: "9折", weight: 48, color: "#D3D3D3" },
-                  { name: "8折", weight: 40, color: "#E6E6FA" },
-                  { name: "飛機杯", weight: 5, color: "#FFDAB9" },
-                  { name: "SUPER 72", weight: 3, color: "#98FB98" },
-                  { name: "買一送二", weight: 3, color: "#FFB6C1" },
-                  { name: "整筆免單", weight: 1, color: "#FFD700" }
+                  { name: "8折官網折價券", weight: 48, color: "#E6E6FA" }, // 48%
+                  { name: "7折官網折價券", weight: 38, color: "#ADD8E6" }, // 38%
+                  { name: "200元折價券", weight: 5, color: "#D3D3D3" },    // 5%
+                  { name: "飛機杯一入", weight: 5, color: "#FFDAB9" },    // 5%
+                  { name: "Super72 一盒", weight: 3, color: "#98FB98" },   // 3%
+                  { name: "全單折抵免單券", weight: 1, color: "#FFD700" }  // 1%
               ]
           }
       ];
@@ -233,11 +229,11 @@
               ctx.translate(centerX, centerY);
               ctx.rotate(angle + sliceAngle / 2);
               ctx.textAlign = "right";
-              /* 轉盤內的文字維持深色，因為底色是淺色扇形 */
               ctx.fillStyle = "#333";
               
+              // 動態調整字體大小，字數較多時自動縮小
               const isManySlices = numSlices > 5;
-              ctx.font = isManySlices ? "bold 20px sans-serif" : "bold 24px sans-serif";
+              ctx.font = isManySlices ? "bold 18px sans-serif" : "bold 22px sans-serif";
               
               ctx.fillText(prizes[i].name, radius - 30, 8);
               ctx.restore();
