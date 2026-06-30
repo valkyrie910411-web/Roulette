@@ -9,7 +9,9 @@
            1. 共用與手機端預設設定 (Mobile First)
            ========================================= */
         body {
-            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            /* 全面替換為華康黑體與黑體系列，並預設粗體 */
+            font-family: "華康黑體", "DFHei", "DFHei-Bold", "DFLiHei-W5", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            font-weight: bold;
             margin: 0;
             padding: 0;
             overflow: hidden; 
@@ -21,22 +23,28 @@
             background-attachment: fixed;
         }
 
+        /* 統一的同步漂浮動畫 */
+        @keyframes syncFloat {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-12px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+
         .header-section {
             position: fixed;
             top: 8vh; 
             left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
             width: 90%;
             z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* 加入同步漂浮動畫 */
+            animation: syncFloat 4s ease-in-out infinite;
         }
 
         #stageTitle {
             font-size: 54px; 
-            font-weight: bold;
             color: #ffffff; 
             margin-bottom: 15px;
             letter-spacing: 4px;
@@ -46,7 +54,6 @@
 
         #result {
             font-size: 32px; 
-            font-weight: bold;
             color: #ffffff; 
             min-height: 90px; 
             text-align: center;
@@ -62,7 +69,7 @@
 
         .nav-btn {
             position: fixed;
-            bottom: 160px; /* 配合轉盤上移，按鈕也同步調高 */
+            bottom: 160px; 
             background: rgba(255, 255, 255, 0.15); 
             border: none;
             font-size: 2.5rem;
@@ -94,19 +101,17 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 轉盤主容器：整合持續上下漂浮的動畫 */
         .slider-viewport {
             width: 600px;
             height: 600px;
             position: fixed;
-            bottom: -180px; /* 轉盤位置更往上提（原為 -240px） */
+            bottom: -180px; 
             left: 50%;
             z-index: 10;
-            /* 預設手機端的複合動畫：置中 + 漂浮 */
-            animation: mobileFloat 4s ease-in-out infinite;
+            /* 與頂部文字共用同一個動畫與節奏，達到完美同步 */
+            animation: syncFloat 4s ease-in-out infinite;
         }
 
-        /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
             width: 200%;
@@ -122,7 +127,6 @@
             justify-content: center;
         }
 
-        /* 畫布：設定固定佈局尺寸，並整合轉盤整體的發光呼吸燈效果 */
         canvas {
             width: 600px;
             height: 600px;
@@ -159,7 +163,6 @@
             border: 6px solid #ffffff; 
             border-radius: 50%;
             font-size: 28px;
-            font-weight: bold;
             cursor: pointer;
             z-index: 40;
             display: flex;
@@ -169,9 +172,9 @@
             transition: all 0.3s;
             letter-spacing: 2px;
             padding-left: 2px;
+            font-family: inherit; /* 繼承華康黑體 */
         }
 
-        /* 當按鈕為可點擊狀態時（沒有 disabled），觸發微發光脈衝效果 */
         #spinBtn:not(:disabled) {
             animation: buttonPulse 2s infinite;
         }
@@ -187,34 +190,15 @@
             cursor: not-allowed;
             box-shadow: none;
             transform: translate(-50%, -50%) scale(1);
-            animation: none; /* 旋轉時停止發光 */
+            animation: none; 
         }
 
-        /* =========================================
-           2. 動態特效 Keyframes
-           ========================================= */
-        /* 手機端漂浮動畫 */
-        @keyframes mobileFloat {
-            0% { transform: translateX(-50%) translateY(0px); }
-            50% { transform: translateX(-50%) translateY(-12px); }
-            100% { transform: translateX(-50%) translateY(0px); }
-        }
-
-        /* 電腦端漂浮動畫（需合併原本的 scale 1.6） */
-        @keyframes pcFloat {
-            0% { transform: translateX(-50%) scale(1.6) translateY(0px); }
-            50% { transform: translateX(-50%) scale(1.6) translateY(-10px); }
-            100% { transform: translateX(-50%) scale(1.6) translateY(0px); }
-        }
-
-        /* 轉盤外圍發光呼吸燈 */
         @keyframes wheelGlow {
             0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
             50% { box-shadow: 0 0 40px rgba(45, 255, 198, 0.7), 0 8px 30px rgba(0,0,0,0.5); }
             100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
         }
 
-        /* Start 按鈕可點擊時的微發光 */
         @keyframes buttonPulse {
             0% { box-shadow: 0 0 12px rgba(246, 135, 32, 0.5), 0 6px 20px rgba(0,0,0,0.4); }
             50% { box-shadow: 0 0 28px rgba(246, 135, 32, 0.9), 0 6px 20px rgba(0,0,0,0.4); }
@@ -226,27 +210,27 @@
            ========================================= */
         @media (min-width: 768px) {
             #stageTitle {
-                font-size: 72px; 
-                margin-top: 20px;
+                font-size: 64px; /* 字體稍微收斂，不至於太過巨大 */
             }
 
             #result {
-                font-size: 42px; 
-                min-height: 120px; 
+                font-size: 38px; 
+                min-height: 100px; 
             }
 
+            /* 取消 scale 縮放，解決模糊與過大的問題，改為微調底部位置 */
             .slider-viewport {
-                bottom: -110px; /* 電腦端更往上提，視覺效果更好 */
-                transform-origin: bottom center; 
-                /* 切換成電腦端的置中 + 縮放 + 漂浮複合動畫 */
-                animation: pcFloat 4s ease-in-out infinite;
+                bottom: -200px; 
+                /* 電腦端維持原本的動畫與位移，不再放大 */
+                animation: syncFloat 4s ease-in-out infinite;
             }
 
+            /* 左右按鈕適度放大並往兩側拉開 */
             .nav-btn {
-                width: 80px;
-                height: 80px;
-                font-size: 3.5rem;
-                bottom: 240px; 
+                width: 70px;
+                height: 70px;
+                font-size: 3rem;
+                bottom: 180px; 
             }
 
             #prevBtn { left: 80px; }
@@ -324,17 +308,13 @@
       let isSpinning = false;
       let currentRotations = [0, 0];
 
-      // 【核心更新】優化 Canvas 解析度，消除模糊
       function setupHighDPIProperties(canvas, ctx) {
           const dpr = window.devicePixelRatio || 1;
-          // 將畫布的點陣大小放大為 DPR 倍數
           canvas.width = 600 * dpr;
           canvas.height = 600 * dpr;
-          // 透過 scale 讓之後的所有繪圖指令自動放大，我們依然可以用 600x600 的邏輯座標寫程式
           ctx.scale(dpr, dpr);
       }
 
-      // 初始化兩個畫布的高解析度設定
       setupHighDPIProperties(canvases[0], contexts[0]);
       setupHighDPIProperties(canvases[1], contexts[1]);
 
@@ -344,10 +324,12 @@
           const numSlices = prizes.length;
           const sliceAngle = (2 * Math.PI) / numSlices;
           
-          // 這裡固定使用 600x600 的邏輯尺寸，因為上方已經設定了 ctx.scale
           const centerX = 300;
           const centerY = 300;
           const radius = 300;
+
+          // 定義 Canvas 內部字型，指定華康黑體系列
+          const fontConfig = "'華康黑體', 'DFHei', 'DFHei-Bold', 'DFLiHei-W5', 'Microsoft JhengHei', sans-serif";
 
           for (let i = 0; i < numSlices; i++) {
               const angle = i * sliceAngle;
@@ -366,7 +348,8 @@
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
-              ctx.font = isManySlices ? "bold 18px sans-serif" : "bold 22px sans-serif";
+              // 套用粗體與華康黑體
+              ctx.font = isManySlices ? `bold 18px ${fontConfig}` : `bold 22px ${fontConfig}`;
               
               ctx.fillText(prizes[i].name, radius - 35, 8);
               ctx.restore();
