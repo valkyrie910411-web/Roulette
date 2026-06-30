@@ -23,7 +23,7 @@
 
         .header-section {
             position: fixed;
-            top: 10vh; /* 稍微往上移一點，騰出空間給兩行文字 */
+            top: 8vh; 
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
@@ -48,16 +48,13 @@
             font-size: 32px; 
             font-weight: bold;
             color: #ffffff; 
-            /* 加大預留高度，防止換行時排版跳動 */
             min-height: 90px; 
             text-align: center;
             text-shadow: 0 0 15px rgba(246,135,32,0.8), 0 2px 5px rgba(0,0,0,0.5);
             letter-spacing: 2px;
-            /* 增加行高，讓「恭喜獲得」與「獎品」之間有呼吸空間 */
             line-height: 1.4; 
         }
 
-        /* 將獎品名稱的顏色特別標示為橘色，增加視覺爽度 */
         .prize-highlight {
             color: #f68720;
             font-size: 1.1em;
@@ -65,7 +62,7 @@
 
         .nav-btn {
             position: fixed;
-            bottom: 120px;
+            bottom: 160px; /* 配合轉盤上移，按鈕也同步調高 */
             background: rgba(255, 255, 255, 0.15); 
             border: none;
             font-size: 2.5rem;
@@ -97,16 +94,19 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
+        /* 轉盤主容器：整合持續上下漂浮的動畫 */
         .slider-viewport {
             width: 600px;
             height: 600px;
             position: fixed;
-            bottom: -240px; 
+            bottom: -180px; /* 轉盤位置更往上提（原為 -240px） */
             left: 50%;
-            transform: translateX(-50%);
             z-index: 10;
+            /* 預設手機端的複合動畫：置中 + 漂浮 */
+            animation: mobileFloat 4s ease-in-out infinite;
         }
 
+        /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
             width: 200%;
@@ -122,12 +122,15 @@
             justify-content: center;
         }
 
+        /* 畫布：設定固定佈局尺寸，並整合轉盤整體的發光呼吸燈效果 */
         canvas {
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
             border: 8px solid #ffffff; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5); 
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
             background-color: #fff;
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            animation: wheelGlow 3s ease-in-out infinite;
         }
 
         .pointer {
@@ -168,7 +171,12 @@
             padding-left: 2px;
         }
 
-        #spinBtn:hover { 
+        /* 當按鈕為可點擊狀態時（沒有 disabled），觸發微發光脈衝效果 */
+        #spinBtn:not(:disabled) {
+            animation: buttonPulse 2s infinite;
+        }
+
+        #spinBtn:hover:not(:disabled) { 
             background-color: #ff9933; 
             transform: translate(-50%, -50%) scale(1.05);
         }
@@ -179,10 +187,42 @@
             cursor: not-allowed;
             box-shadow: none;
             transform: translate(-50%, -50%) scale(1);
+            animation: none; /* 旋轉時停止發光 */
         }
 
         /* =========================================
-           2. 電腦端 (大螢幕) 專屬設定 (PC View)
+           2. 動態特效 Keyframes
+           ========================================= */
+        /* 手機端漂浮動畫 */
+        @keyframes mobileFloat {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-12px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+
+        /* 電腦端漂浮動畫（需合併原本的 scale 1.6） */
+        @keyframes pcFloat {
+            0% { transform: translateX(-50%) scale(1.6) translateY(0px); }
+            50% { transform: translateX(-50%) scale(1.6) translateY(-10px); }
+            100% { transform: translateX(-50%) scale(1.6) translateY(0px); }
+        }
+
+        /* 轉盤外圍發光呼吸燈 */
+        @keyframes wheelGlow {
+            0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
+            50% { box-shadow: 0 0 40px rgba(45, 255, 198, 0.7), 0 8px 30px rgba(0,0,0,0.5); }
+            100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
+        }
+
+        /* Start 按鈕可點擊時的微發光 */
+        @keyframes buttonPulse {
+            0% { box-shadow: 0 0 12px rgba(246, 135, 32, 0.5), 0 6px 20px rgba(0,0,0,0.4); }
+            50% { box-shadow: 0 0 28px rgba(246, 135, 32, 0.9), 0 6px 20px rgba(0,0,0,0.4); }
+            100% { box-shadow: 0 0 12px rgba(246, 135, 32, 0.5), 0 6px 20px rgba(0,0,0,0.4); }
+        }
+
+        /* =========================================
+           3. 電腦端 (大螢幕) 專屬設定 (PC View)
            ========================================= */
         @media (min-width: 768px) {
             #stageTitle {
@@ -192,20 +232,21 @@
 
             #result {
                 font-size: 42px; 
-                min-height: 120px; /* 電腦端字體變大，預留高度也要增加 */
+                min-height: 120px; 
             }
 
             .slider-viewport {
-                transform: translateX(-50%) scale(1.6);
+                bottom: -110px; /* 電腦端更往上提，視覺效果更好 */
                 transform-origin: bottom center; 
-                bottom: -200px; 
+                /* 切換成電腦端的置中 + 縮放 + 漂浮複合動畫 */
+                animation: pcFloat 4s ease-in-out infinite;
             }
 
             .nav-btn {
                 width: 80px;
                 height: 80px;
                 font-size: 3.5rem;
-                bottom: 180px; 
+                bottom: 240px; 
             }
 
             #prevBtn { left: 80px; }
@@ -230,10 +271,10 @@
         
         <div class="slider-track" id="sliderTrack">
             <div class="wheel-stage">
-                <canvas id="canvas0" width="600" height="600"></canvas>
+                <canvas id="canvas0"></canvas>
             </div>
             <div class="wheel-stage">
-                <canvas id="canvas1" width="600" height="600"></canvas>
+                <canvas id="canvas1"></canvas>
             </div>
         </div>
     </div>
@@ -283,16 +324,30 @@
       let isSpinning = false;
       let currentRotations = [0, 0];
 
+      // 【核心更新】優化 Canvas 解析度，消除模糊
+      function setupHighDPIProperties(canvas, ctx) {
+          const dpr = window.devicePixelRatio || 1;
+          // 將畫布的點陣大小放大為 DPR 倍數
+          canvas.width = 600 * dpr;
+          canvas.height = 600 * dpr;
+          // 透過 scale 讓之後的所有繪圖指令自動放大，我們依然可以用 600x600 的邏輯座標寫程式
+          ctx.scale(dpr, dpr);
+      }
+
+      // 初始化兩個畫布的高解析度設定
+      setupHighDPIProperties(canvases[0], contexts[0]);
+      setupHighDPIProperties(canvases[1], contexts[1]);
+
       function drawEqualWheel(stageIndex) {
           const ctx = contexts[stageIndex];
-          const canvas = canvases[stageIndex];
           const prizes = stagesData[stageIndex].prizes;
           const numSlices = prizes.length;
           const sliceAngle = (2 * Math.PI) / numSlices;
           
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          const radius = canvas.width / 2;
+          // 這裡固定使用 600x600 的邏輯尺寸，因為上方已經設定了 ctx.scale
+          const centerX = 300;
+          const centerY = 300;
+          const radius = 300;
 
           for (let i = 0; i < numSlices; i++) {
               const angle = i * sliceAngle;
@@ -397,7 +452,6 @@
               prevBtn.disabled = false;
               nextBtn.disabled = false;
               
-              // 在這裡將文字分成兩行，並替獎品加上 highlight class 來改變顏色
               resultDiv.innerHTML = `🎉 恭喜獲得<br><span class="prize-highlight">${prizes[winningIndex].name}</span>`;
           }, 4000);
       });
