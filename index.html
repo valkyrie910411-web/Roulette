@@ -12,9 +12,15 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #2b2b2b; 
             margin: 0;
             overflow-x: hidden;
+            
+            /* 1. 全新漸層背景：放射漸層疊加在線性漸層之上 */
+            background: 
+                radial-gradient(circle at top left, #ec8427 0%, rgba(255, 255, 255, 0) 60%),
+                radial-gradient(circle at bottom right, #ec8427 0%, rgba(255, 255, 255, 0) 60%),
+                linear-gradient(50.35deg, #114d5e, #1f9273, #3fa0b1, #2dffc6);
+            background-attachment: fixed; /* 讓背景固定，畫面更乾淨 */
         }
 
         #stageTitle {
@@ -24,37 +30,39 @@
             margin-bottom: 20px;
             letter-spacing: 2px;
             transition: opacity 0.3s ease;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3); /* 幫標題加點陰影，在複雜背景上更清楚 */
         }
 
         .nav-btn {
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.1); 
+            background: rgba(255, 255, 255, 0.15); 
             border: none;
             font-size: 2.5rem;
             cursor: pointer;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            color: #ccc;
+            color: #fff;
             transition: all 0.3s ease;
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(5px); /* 毛玻璃效果 */
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) scale(1.1); /* 滑鼠游標靠近時微微放大 */
         }
 
         .nav-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             background: rgba(255, 255, 255, 0.05);
-            color: #555;
+            transform: translateY(-50%) scale(1);
         }
 
         #prevBtn { left: 30px; display: none; }
@@ -65,6 +73,10 @@
             overflow: hidden;
             margin-bottom: 40px;
             position: relative;
+            /* 留白給外框和陰影，避免被容器切掉 */
+            padding: 20px; 
+            margin: -20px;
+            margin-bottom: 20px;
         }
 
         .slider-track {
@@ -82,7 +94,7 @@
 
         .pointer {
             position: absolute;
-            top: -20px;
+            top: -26px; /* 稍微往上微調，避開白色的粗邊框 */
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -91,42 +103,54 @@
             border-right: 20px solid transparent;
             border-top: 40px solid #ff4d4d;
             z-index: 10;
+            /* 幫指標加點陰影，讓立體感更好 */
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3)); 
         }
 
         canvas {
             border-radius: 50%;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+            /* 2. 轉盤的純白色筆畫外框 */
+            border: 6px solid #ffffff; 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4); 
             transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            background-color: #fff; /* 確保畫布底色是乾淨的 */
         }
 
         button.spin-btn {
-            padding: 12px 30px;
-            font-size: 18px;
-            color: #fff;
-            background-color: #444; 
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #114d5e;
+            background-color: #ffffff; /* 按鈕改成白色，搭配漸層底色更亮眼 */
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             letter-spacing: 2px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        button.spin-btn:hover { background-color: #666; }
+        button.spin-btn:hover { 
+            background-color: #f0f0f0; 
+            transform: translateY(-2px);
+        }
+        
         button.spin-btn:disabled {
-            background-color: #222;
-            color: #666;
+            background-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.5);
             cursor: not-allowed;
             box-shadow: none;
+            transform: none;
         }
 
         #result {
-            margin-top: 20px;
-            font-size: 22px;
+            margin-top: 25px;
+            font-size: 24px;
             font-weight: bold;
             color: #ffffff; 
-            min-height: 30px;
+            min-height: 35px;
             text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -170,7 +194,6 @@
           canvases[1].getContext('2d')
       ];
 
-      // 1. 在這裡設定轉盤扇形的顏色 (color)
       const stagesData = [
           {
               title: "見面禮轉盤",
@@ -179,7 +202,6 @@
                   { name: "女優拍照", weight: 30, color: "#114d5e" },
                   { name: "銘謝惠顧", weight: 0, color: "#0b6170" },
                   { name: "心跳蔓越莓一錠", weight: 30, color: "#114d5e" },
-                  // 備註：因為第一階段是奇數(5個)，頭尾顏色會相連，所以最後一個稍微調深一點點來做出區隔，改為 #084c59 (同色系較深)，若你想保持一模一樣可以改回 #0b6170
                   { name: "Super72 一錠", weight: 20, color: "#084c59" } 
               ]
           },
@@ -191,7 +213,7 @@
                   { name: "200元折價券", weight: 5, color: "#0b6170" },
                   { name: "飛機杯一入", weight: 5, color: "#114d5e" },
                   { name: "Super72 一盒", weight: 3, color: "#0b6170" },
-                  { name: "全單折抵免單券", weight: 1, color: "#f68720" }  // 大獎專屬橘色
+                  { name: "全單折抵免單券", weight: 1, color: "#f68720" }  
               ]
           }
       ];
@@ -226,7 +248,7 @@
               ctx.rotate(angle + sliceAngle / 2);
               ctx.textAlign = "right";
               
-              // 2. 在這裡將轉盤文字改為純白色
+              // 轉盤上的文字維持純白
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
