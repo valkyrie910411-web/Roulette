@@ -6,10 +6,9 @@
     <title>芮森性福抽獎轉盤</title>
     <style>
         /* =========================================
-           1. 共用與手機端預設設定 (Mobile First)
+           1. 手機端預設設定 (Mobile First)
            ========================================= */
         body {
-            /* 全面替換為華康黑體與黑體系列，並預設粗體 */
             font-family: "華康黑體", "DFHei", "DFHei-Bold", "DFLiHei-W5", "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
             font-weight: bold;
             margin: 0;
@@ -39,7 +38,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 加入同步漂浮動畫 */
             animation: syncFloat 4s ease-in-out infinite;
         }
 
@@ -108,7 +106,6 @@
             bottom: -180px; 
             left: 50%;
             z-index: 10;
-            /* 與頂部文字共用同一個動畫與節奏，達到完美同步 */
             animation: syncFloat 4s ease-in-out infinite;
         }
 
@@ -172,7 +169,7 @@
             transition: all 0.3s;
             letter-spacing: 2px;
             padding-left: 2px;
-            font-family: inherit; /* 繼承華康黑體 */
+            font-family: inherit; 
         }
 
         #spinBtn:not(:disabled) {
@@ -205,36 +202,63 @@
             100% { box-shadow: 0 0 12px rgba(246, 135, 32, 0.5), 0 6px 20px rgba(0,0,0,0.4); }
         }
 
+
         /* =========================================
-           3. 電腦端 (大螢幕) 專屬設定 (PC View)
+           2. 平板直式專屬設定 (Tablet Portrait)
+           解鎖平板上的距離過遠與比例太小問題
            ========================================= */
-        @media (min-width: 768px) {
-            #stageTitle {
-                font-size: 64px; /* 字體稍微收斂，不至於太過巨大 */
+        @media (min-width: 768px) and (orientation: portrait) {
+            .header-section {
+                top: 20vh; /* 將文字往下壓，大幅縮小跟轉盤的間距 */
             }
+            #stageTitle { font-size: 72px; }
+            #result { font-size: 42px; min-height: 120px; }
 
-            #result {
-                font-size: 38px; 
-                min-height: 100px; 
-            }
-
-            /* 取消 scale 縮放，解決模糊與過大的問題，改為微調底部位置 */
             .slider-viewport {
-                bottom: -200px; 
-                /* 電腦端維持原本的動畫與位移，不再放大 */
-                animation: syncFloat 4s ease-in-out infinite;
+                bottom: -240px; 
+                transform-origin: bottom center; /* 確保放大時緊貼螢幕底部 */
+                /* 放大 1.4 倍，讓平板也能滿版，因為平板是 Retina 螢幕，絕不模糊 */
+                animation: tabletFloat 4s ease-in-out infinite;
             }
 
-            /* 左右按鈕適度放大並往兩側拉開 */
             .nav-btn {
-                width: 70px;
-                height: 70px;
-                font-size: 3rem;
-                bottom: 180px; 
+                width: 80px; height: 80px; font-size: 3.5rem;
+                bottom: 240px; 
+            }
+            #prevBtn { left: 40px; }
+            #nextBtn { right: 40px; }
+        }
+
+        /* 平板專屬的放大版漂浮動畫 */
+        @keyframes tabletFloat {
+            0% { transform: translateX(-50%) scale(1.4) translateY(0px); }
+            50% { transform: translateX(-50%) scale(1.4) translateY(-10px); }
+            100% { transform: translateX(-50%) scale(1.4) translateY(0px); }
+        }
+
+
+        /* =========================================
+           3. 電腦端 / 平板橫屏專屬設定 (PC / Landscape)
+           確保大尺寸寬螢幕排版精緻且不模糊
+           ========================================= */
+        @media (min-width: 768px) and (orientation: landscape) {
+            .header-section {
+                top: 15vh; /* 文字往下壓一點點 */
+            }
+            #stageTitle { font-size: 64px; }
+            #result { font-size: 38px; min-height: 100px; }
+
+            .slider-viewport {
+                bottom: -100px; /* 將轉盤往上拉起，填補中間的空洞 */
+                animation: syncFloat 4s ease-in-out infinite; 
             }
 
-            #prevBtn { left: 80px; }
-            #nextBtn { right: 80px; }
+            .nav-btn {
+                width: 70px; height: 70px; font-size: 3rem;
+                bottom: 200px; 
+            }
+            #prevBtn { left: 100px; }
+            #nextBtn { right: 100px; }
         }
 
     </style>
@@ -328,7 +352,6 @@
           const centerY = 300;
           const radius = 300;
 
-          // 定義 Canvas 內部字型，指定華康黑體系列
           const fontConfig = "'華康黑體', 'DFHei', 'DFHei-Bold', 'DFLiHei-W5', 'Microsoft JhengHei', sans-serif";
 
           for (let i = 0; i < numSlices; i++) {
@@ -348,7 +371,6 @@
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
-              // 套用粗體與華康黑體
               ctx.font = isManySlices ? `bold 18px ${fontConfig}` : `bold 22px ${fontConfig}`;
               
               ctx.fillText(prizes[i].name, radius - 35, 8);
