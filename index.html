@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芮森性福抽獎轉盤</title>
     <style>
+        /* =========================================
+           1. 共用與手機端預設設定 (Mobile First)
+           ========================================= */
         body {
             font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
             margin: 0;
             padding: 0;
-            /* 隱藏超出畫面的部分，防止上下左右滑動 */
             overflow: hidden; 
             height: 100vh;
             background: 
@@ -19,10 +21,9 @@
             background-attachment: fixed;
         }
 
-        /* 頂部文字區塊：固定在畫面上半部 */
         .header-section {
             position: fixed;
-            top: 12vh;
+            top: 10vh; /* 稍微往上移一點，騰出空間給兩行文字 */
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
@@ -34,7 +35,7 @@
         }
 
         #stageTitle {
-            font-size: 54px; /* 標題字號放大 */
+            font-size: 54px; 
             font-weight: bold;
             color: #ffffff; 
             margin-bottom: 15px;
@@ -44,17 +45,24 @@
         }
 
         #result {
-            font-size: 32px; /* 結果字號放大 */
+            font-size: 32px; 
             font-weight: bold;
             color: #ffffff; 
-            min-height: 45px;
+            /* 加大預留高度，防止換行時排版跳動 */
+            min-height: 90px; 
             text-align: center;
-            /* 讓結果文字有橘色光暈，更加亮眼 */
-            text-shadow: 0 0 15px #f68720, 0 2px 5px rgba(0,0,0,0.5);
+            text-shadow: 0 0 15px rgba(246,135,32,0.8), 0 2px 5px rgba(0,0,0,0.5);
             letter-spacing: 2px;
+            /* 增加行高，讓「恭喜獲得」與「獎品」之間有呼吸空間 */
+            line-height: 1.4; 
         }
 
-        /* 兩側切換按鈕：移到下方與轉盤平齊 */
+        /* 將獎品名稱的顏色特別標示為橘色，增加視覺爽度 */
+        .prize-highlight {
+            color: #f68720;
+            font-size: 1.1em;
+        }
+
         .nav-btn {
             position: fixed;
             bottom: 120px;
@@ -89,19 +97,16 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 轉盤主容器：固定在畫面最下方，讓下半部超出螢幕被隱藏 */
         .slider-viewport {
             width: 600px;
             height: 600px;
             position: fixed;
-            /* 轉盤半徑300，向下推240，代表中心點距離底部有60px，剛好完整顯示中間的按鈕 */
             bottom: -240px; 
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
         }
 
-        /* 實際滑動的軌道 */
         .slider-track {
             display: flex;
             width: 200%;
@@ -125,7 +130,6 @@
             background-color: #fff;
         }
 
-        /* 指針：拉出軌道外獨立定位，永遠在上方正中央 */
         .pointer {
             position: absolute;
             top: -20px;
@@ -135,13 +139,11 @@
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            /* 改為大獎橘色色號 */
             border-top: 45px solid #f68720; 
             z-index: 30;
             filter: drop-shadow(0 6px 6px rgba(0,0,0,0.4)); 
         }
 
-        /* 圓形 Start 按鈕：絕對置中於轉盤 */
         #spinBtn {
             position: absolute;
             top: 50%;
@@ -149,9 +151,8 @@
             transform: translate(-50%, -50%);
             width: 120px;
             height: 120px;
-            background-color: #f68720; /* 大獎橘色色號 */
+            background-color: #f68720; 
             color: #ffffff;
-            /* 加上白色粗邊框，讓它跟轉盤完美隔開 */
             border: 6px solid #ffffff; 
             border-radius: 50%;
             font-size: 28px;
@@ -164,7 +165,7 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
             transition: all 0.3s;
             letter-spacing: 2px;
-            padding-left: 2px; /* 微調字元置中 */
+            padding-left: 2px;
         }
 
         #spinBtn:hover { 
@@ -178,6 +179,37 @@
             cursor: not-allowed;
             box-shadow: none;
             transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* =========================================
+           2. 電腦端 (大螢幕) 專屬設定 (PC View)
+           ========================================= */
+        @media (min-width: 768px) {
+            #stageTitle {
+                font-size: 72px; 
+                margin-top: 20px;
+            }
+
+            #result {
+                font-size: 42px; 
+                min-height: 120px; /* 電腦端字體變大，預留高度也要增加 */
+            }
+
+            .slider-viewport {
+                transform: translateX(-50%) scale(1.6);
+                transform-origin: bottom center; 
+                bottom: -200px; 
+            }
+
+            .nav-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 3.5rem;
+                bottom: 180px; 
+            }
+
+            #prevBtn { left: 80px; }
+            #nextBtn { right: 80px; }
         }
 
     </style>
@@ -281,7 +313,6 @@
               const isManySlices = numSlices > 5;
               ctx.font = isManySlices ? "bold 18px sans-serif" : "bold 22px sans-serif";
               
-              // 微調文字位置，確保邊緣和內圈按鈕都不會擋到字
               ctx.fillText(prizes[i].name, radius - 35, 8);
               ctx.restore();
           }
@@ -314,7 +345,7 @@
               stageTitle.style.opacity = 1;
           }, 150);
 
-          resultDiv.textContent = "";
+          resultDiv.innerHTML = "";
 
           const translateX = currentStageIndex * -50;
           sliderTrack.style.transform = `translateX(${translateX}%)`;
@@ -332,7 +363,7 @@
           spinBtn.disabled = true;
           prevBtn.disabled = true;
           nextBtn.disabled = true;
-          resultDiv.textContent = "";
+          resultDiv.innerHTML = "";
 
           const prizes = stagesData[currentStageIndex].prizes;
           const numSlices = prizes.length;
@@ -366,7 +397,8 @@
               prevBtn.disabled = false;
               nextBtn.disabled = false;
               
-              resultDiv.textContent = `🎉 恭喜獲得：${prizes[winningIndex].name}`;
+              // 在這裡將文字分成兩行，並替獎品加上 highlight class 來改變顏色
+              resultDiv.innerHTML = `🎉 恭喜獲得<br><span class="prize-highlight">${prizes[winningIndex].name}</span>`;
           }, 4000);
       });
     </script>
