@@ -22,12 +22,11 @@
             background-attachment: fixed;
         }
 
-        /* 頂部文字區塊：完全靜止，不加任何漂浮動畫 */
+        /* 頂部文字區塊：完全靜止 */
         .header-section {
             position: fixed;
             top: 8vh; 
             left: 50%;
-            /* 加上靜態的水平置中，確保文字不會亂跑 */
             transform: translateX(-50%); 
             width: 90%;
             z-index: 50;
@@ -94,12 +93,12 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
-        /* 轉盤主容器：保留獨立的上下漂浮動畫 */
+        /* 轉盤主容器：下移至 -240px */
         .slider-viewport {
             width: 600px;
             height: 600px;
             position: fixed;
-            bottom: -180px; 
+            bottom: -240px; 
             left: 50%;
             z-index: 10;
             animation: wheelFloat 4s ease-in-out infinite;
@@ -215,8 +214,9 @@
             .header-section {
                 top: 10vh; 
             }
-            #stageTitle { font-size: 72px; }
-            #result { font-size: 42px; min-height: 120px; }
+            /* ★ 將平板文字大幅度放大 */
+            #stageTitle { font-size: 88px; } 
+            #result { font-size: 54px; min-height: 150px; } 
 
             .slider-viewport {
                 width: 840px; 
@@ -265,8 +265,9 @@
             .header-section {
                 top: 15vh; 
             }
-            #stageTitle { font-size: 64px; }
-            #result { font-size: 38px; min-height: 100px; }
+            /* ★ 稍微同步放大橫向畫面的文字，確保氣勢 */
+            #stageTitle { font-size: 72px; }
+            #result { font-size: 46px; min-height: 120px; }
 
             .slider-viewport {
                 bottom: -100px; 
