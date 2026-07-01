@@ -298,47 +298,50 @@
 
         /* =========================================
            3. 電腦端 / 平板橫屏專屬設定 (PC / Landscape)
-           ★ 將轉盤稍作收斂，文字上提，保證絕不壓字
+           ★ 縮小轉盤，放大文字，達到完美視覺平衡
            ========================================= */
         @media (min-width: 768px) and (orientation: landscape) {
             .header-section {
-                top: 4vh; /* 將文字區塊推近上邊緣 */
+                top: 6vh; /* 確保上方留有舒適的呼吸空間 */
             }
-            #stageTitle { font-size: 7vh; margin-bottom: 2vh; }
-            #result { font-size: 4.5vh; min-height: 10vh; }
+            /* ★ 標題文字變得更大，達到 9vh 的霸氣尺寸 */
+            #stageTitle { font-size: 9vh; margin-bottom: 2vh; } 
+            #result { font-size: 5vh; min-height: 12vh; }
 
             .slider-viewport {
-                /* 將轉盤尺寸從 120vh 縮至 96vh，並調整高度 */
-                width: 96vh; 
-                height: 96vh;
-                bottom: -32vh; /* 確保 Start 鍵仍在好點擊的底部 */
+                /* ★ 將轉盤尺寸縮小至 80vh */
+                width: 80vh; 
+                height: 80vh;
+                /* ★ 確保 Start 鍵完美落在底部 */
+                bottom: -22vh; 
                 animation: pcWheelFloat 4s ease-in-out infinite; 
             }
             .wheel-stage { 
-                width: 96vh; 
-                height: 96vh; 
+                width: 80vh; 
+                height: 80vh; 
             }
-            .wheel-stage canvas { border-width: 1.2vh; }
+            .wheel-stage canvas { border-width: 1vh; }
 
             .pointer {
                 top: -3vh;
-                border-left-width: 3.5vh;
-                border-right-width: 3.5vh;
-                border-top-width: 7.5vh;
+                border-left-width: 3vh;
+                border-right-width: 3vh;
+                border-top-width: 7vh;
             }
             #spinBtn {
-                width: 20vh; 
-                height: 20vh; 
+                width: 18vh; 
+                height: 18vh; 
                 border-width: 0.8vh; 
-                font-size: 4.5vh; 
+                font-size: 4vh; 
             }
 
             .nav-btn {
                 width: 8vh; height: 8vh; font-size: 3.5vh;
                 bottom: 22vh; 
             }
-            #prevBtn { left: 8vw; }
-            #nextBtn { right: 8vw; }
+            /* 切換按鈕往兩側再退一點，避免跟大字體打架 */
+            #prevBtn { left: 12vw; }
+            #nextBtn { right: 12vw; }
         }
 
         @keyframes pcWheelFloat {
