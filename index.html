@@ -298,21 +298,17 @@
 
         /* =========================================
            3. 電腦端 / 平板橫屏專屬設定 (PC / Landscape)
-           ★ 縮小轉盤，放大文字，達到完美視覺平衡
            ========================================= */
         @media (min-width: 768px) and (orientation: landscape) {
             .header-section {
-                top: 6vh; /* 確保上方留有舒適的呼吸空間 */
+                top: 6vh; 
             }
-            /* ★ 標題文字變得更大，達到 9vh 的霸氣尺寸 */
             #stageTitle { font-size: 9vh; margin-bottom: 2vh; } 
             #result { font-size: 5vh; min-height: 12vh; }
 
             .slider-viewport {
-                /* ★ 將轉盤尺寸縮小至 80vh */
                 width: 80vh; 
                 height: 80vh;
-                /* ★ 確保 Start 鍵完美落在底部 */
                 bottom: -22vh; 
                 animation: pcWheelFloat 4s ease-in-out infinite; 
             }
@@ -339,7 +335,6 @@
                 width: 8vh; height: 8vh; font-size: 3.5vh;
                 bottom: 22vh; 
             }
-            /* 切換按鈕往兩側再退一點，避免跟大字體打架 */
             #prevBtn { left: 12vw; }
             #nextBtn { right: 12vw; }
         }
@@ -395,15 +390,15 @@
           canvases[1].getContext('2d')
       ];
 
+      // ★ 移除了「銘謝惠顧」，並調整了顏色，讓 4 個選項完美雙色交替
       const stagesData = [
           {
               title: "見面禮轉盤",
               prizes: [
                   { name: "100元折價券", weight: 20, color: "#0b6170" },
                   { name: "模特拍照 一次", weight: 30, color: "#114d5e" },
-                  { name: "銘謝惠顧", weight: 0, color: "#0b6170" },
-                  { name: "心跳蔓越莓 一錠", weight: 30, color: "#114d5e" },
-                  { name: "Super72 一錠", weight: 20, color: "#084c59" } 
+                  { name: "心跳蔓越莓 一錠", weight: 30, color: "#0b6170" },
+                  { name: "Super72 一錠", weight: 20, color: "#114d5e" } 
               ]
           },
           {
