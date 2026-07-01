@@ -31,10 +31,9 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 1s ease;
-            z-index: 5; /* 在背景之上，但在轉盤與文字之下 */
+            z-index: 5; 
         }
         
-        /* 當 body 擁有 golden-mode 類別時觸發 */
         body.golden-mode .golden-overlay {
             opacity: 1;
         }
@@ -187,7 +186,7 @@
             border: 6px solid #ffffff; 
             border-radius: 50%;
             font-size: 28px;
-            font-weight: 900; /* ★ 將字體加到最粗 */
+            font-weight: 900; 
             cursor: pointer;
             z-index: 40;
             display: flex;
@@ -230,7 +229,6 @@
             100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
         }
 
-        /* 專屬大獎的金黃呼吸燈 */
         @keyframes goldenGlow {
             0% { box-shadow: 0 0 30px rgba(255,215,0,0.6), 0 8px 30px rgba(0,0,0,0.5); }
             50% { box-shadow: 0 0 80px rgba(255,215,0,1), 0 8px 30px rgba(0,0,0,0.5); }
@@ -249,9 +247,8 @@
            ========================================= */
         @media (min-width: 768px) and (orientation: portrait) {
             .header-section {
-                top: 8vh; 
+                top: 4vh; /* ★ 將平板端文字區塊再往上提一點 */
             }
-            /* ★ 將平板端文字霸氣放到最大 */
             #stageTitle { font-size: 110px; margin-bottom: 25px; } 
             #result { font-size: 68px; min-height: 180px; } 
 
@@ -277,7 +274,7 @@
                 width: 168px; 
                 height: 168px; 
                 border-width: 8px; 
-                font-size: 44px; /* 按鈕字體跟著變大 */
+                font-size: 44px; 
             }
 
             .nav-btn {
@@ -387,7 +384,6 @@
           }
       ];
 
-      // 用於大獎的漸層金色陣列
       const goldenColors = ["#FFDF00", "#DAA520", "#FFD700", "#B8860B", "#F4A460", "#FF8C00"];
 
       let currentStageIndex = 0; 
@@ -406,7 +402,6 @@
       setupHighDPIProperties(canvases[0], contexts[0]);
       setupHighDPIProperties(canvases[1], contexts[1]);
 
-      // 加入 isGolden 參數，當為 true 時，轉盤將重繪為黃金版
       function drawEqualWheel(stageIndex, isGolden = false) {
           const ctx = contexts[stageIndex];
           const prizes = stagesData[stageIndex].prizes;
@@ -417,7 +412,6 @@
           const centerY = 420;
           const radius = 420;
 
-          // 每次重繪前先清空畫布
           ctx.clearRect(0, 0, 840, 840);
 
           const fontConfig = "'華康黑體', 'DFHei', 'DFHei-Bold', 'DFLiHei-W5', 'Microsoft JhengHei', sans-serif";
@@ -426,7 +420,6 @@
               const angle = i * sliceAngle;
 
               ctx.beginPath();
-              // 如果觸發免單，替換為黃金配色
               ctx.fillStyle = isGolden ? goldenColors[i % goldenColors.length] : prizes[i].color;
               ctx.moveTo(centerX, centerY);
               ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
@@ -450,7 +443,6 @@
       drawEqualWheel(0);
       drawEqualWheel(1);
 
-      // 解除大獎狀態，恢復原狀
       function resetGoldenMode() {
           if (document.body.classList.contains('golden-mode')) {
               document.body.classList.remove('golden-mode');
@@ -475,7 +467,7 @@
       function slideToStage(index) {
           if (isSpinning) return;
 
-          resetGoldenMode(); // 切換階段時解除黃金模式
+          resetGoldenMode(); 
 
           currentStageIndex = index;
           
@@ -500,7 +492,7 @@
       spinBtn.addEventListener('click', () => {
           if (isSpinning) return;
 
-          resetGoldenMode(); // 重新抽獎時解除黃金模式
+          resetGoldenMode(); 
 
           isSpinning = true;
           spinBtn.disabled = true;
@@ -542,12 +534,10 @@
               
               resultDiv.innerHTML = `🎉 恭喜獲得<br><span class="prize-highlight">${prizes[winningIndex].name}</span>`;
 
-              // ★ 觸發免單大獎特效
               if (prizes[winningIndex].name === "全單折抵免單券") {
                   document.body.classList.add('golden-mode');
-                  drawEqualWheel(currentStageIndex, true); // 重繪為黃金轉盤
+                  drawEqualWheel(currentStageIndex, true); 
 
-                  // 噴發彩帶邏輯 (持續 3 秒的華麗噴發)
                   const duration = 3000;
                   const animationEnd = Date.now() + duration;
                   const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000, colors: ['#FFD700', '#FFA500', '#FFFFFF', '#f68720'] };
@@ -563,7 +553,6 @@
                       }
                       const particleCount = 50 * (timeLeft / duration);
                       
-                      // 讓彩帶從畫面左右兩側往上噴
                       confetti(Object.assign({}, defaults, { particleCount,
                           origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
                       }));
