@@ -298,45 +298,44 @@
 
         /* =========================================
            3. 電腦端 / 平板橫屏專屬設定 (PC / Landscape)
-           ★ 全新 vh 滿版設計，無懼任何螢幕比例
+           ★ 將轉盤稍作收斂，文字上提，保證絕不壓字
            ========================================= */
         @media (min-width: 768px) and (orientation: landscape) {
             .header-section {
-                top: 5vh; 
+                top: 4vh; /* 將文字區塊推近上邊緣 */
             }
             #stageTitle { font-size: 7vh; margin-bottom: 2vh; }
-            #result { font-size: 5vh; min-height: 12vh; }
+            #result { font-size: 4.5vh; min-height: 10vh; }
 
-            /* 使用相對螢幕高度(vh)，讓轉盤永遠巨大且剛好切掉下半部 */
             .slider-viewport {
-                width: 120vh; 
-                height: 120vh;
-                /* 將轉盤往下拉，讓 Start 按鈕剛好貼緊螢幕下邊緣 */
-                bottom: -46vh; 
+                /* 將轉盤尺寸從 120vh 縮至 96vh，並調整高度 */
+                width: 96vh; 
+                height: 96vh;
+                bottom: -32vh; /* 確保 Start 鍵仍在好點擊的底部 */
                 animation: pcWheelFloat 4s ease-in-out infinite; 
             }
             .wheel-stage { 
-                width: 120vh; 
-                height: 120vh; 
+                width: 96vh; 
+                height: 96vh; 
             }
-            .wheel-stage canvas { border-width: 1.5vh; }
+            .wheel-stage canvas { border-width: 1.2vh; }
 
             .pointer {
                 top: -3vh;
-                border-left-width: 4vh;
-                border-right-width: 4vh;
-                border-top-width: 9vh;
+                border-left-width: 3.5vh;
+                border-right-width: 3.5vh;
+                border-top-width: 7.5vh;
             }
             #spinBtn {
-                width: 24vh; 
-                height: 24vh; 
-                border-width: 1vh; 
-                font-size: 5vh; 
+                width: 20vh; 
+                height: 20vh; 
+                border-width: 0.8vh; 
+                font-size: 4.5vh; 
             }
 
             .nav-btn {
-                width: 9vh; height: 9vh; font-size: 4vh;
-                bottom: 25vh; 
+                width: 8vh; height: 8vh; font-size: 3.5vh;
+                bottom: 22vh; 
             }
             #prevBtn { left: 8vw; }
             #nextBtn { right: 8vw; }
@@ -423,7 +422,6 @@
       let isSpinning = false;
       let currentRotations = [0, 0];
 
-      // ★ 底層畫布極限升級：基準尺寸擴增至 1600px，確保 4K 大螢幕絕不模糊
       function setupHighDPIProperties(canvas, ctx) {
           const dpr = window.devicePixelRatio || 1;
           const maxLogicalSize = 1600; 
