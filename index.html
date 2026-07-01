@@ -22,24 +22,18 @@
             background-attachment: fixed;
         }
 
-        /* 統一的同步漂浮動畫 */
-        @keyframes syncFloat {
-            0% { transform: translateX(-50%) translateY(0px); }
-            50% { transform: translateX(-50%) translateY(-12px); }
-            100% { transform: translateX(-50%) translateY(0px); }
-        }
-
+        /* 頂部文字區塊：完全靜止，不加任何漂浮動畫 */
         .header-section {
             position: fixed;
             top: 8vh; 
             left: 50%;
-            transform: translateX(-50%);
+            /* 加上靜態的水平置中，確保文字不會亂跑 */
+            transform: translateX(-50%); 
             width: 90%;
             z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: syncFloat 4s ease-in-out infinite;
         }
 
         #stageTitle {
@@ -100,6 +94,7 @@
         #prevBtn { left: 30px; display: none; }
         #nextBtn { right: 30px; }
 
+        /* 轉盤主容器：保留獨立的上下漂浮動畫 */
         .slider-viewport {
             width: 600px;
             height: 600px;
@@ -107,7 +102,7 @@
             bottom: -180px; 
             left: 50%;
             z-index: 10;
-            animation: syncFloat 4s ease-in-out infinite;
+            animation: wheelFloat 4s ease-in-out infinite;
         }
 
         .slider-track {
@@ -125,11 +120,10 @@
             justify-content: center;
         }
 
-        /* 畫布寬高完全交給容器控制，確保縮放比例完美 */
         canvas {
             width: 100%;
             height: 100%;
-            box-sizing: border-box; /* 確保邊框不會擠壓變形 */
+            box-sizing: border-box; 
             border-radius: 50%;
             border: 8px solid #ffffff; 
             background-color: #fff;
@@ -194,6 +188,13 @@
             animation: none; 
         }
 
+        /* 專屬轉盤的漂浮動畫 */
+        @keyframes wheelFloat {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-12px); }
+            100% { transform: translateX(-50%) translateY(0px); }
+        }
+
         @keyframes wheelGlow {
             0% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 8px 30px rgba(0,0,0,0.5); }
             50% { box-shadow: 0 0 40px rgba(45, 255, 198, 0.7), 0 8px 30px rgba(0,0,0,0.5); }
@@ -209,7 +210,6 @@
 
         /* =========================================
            2. 平板直式專屬設定 (Tablet Portrait)
-           完全捨棄 transform: scale()，改用原生真實解析度！
            ========================================= */
         @media (min-width: 768px) and (orientation: portrait) {
             .header-section {
@@ -218,7 +218,6 @@
             #stageTitle { font-size: 72px; }
             #result { font-size: 42px; min-height: 120px; }
 
-            /* 容器原生放大至 840px (原本的 1.4 倍)，保證極致清晰 */
             .slider-viewport {
                 width: 840px; 
                 height: 840px;
@@ -231,7 +230,6 @@
             }
             canvas { border-width: 11px; }
 
-            /* 指針與按鈕同步原生放大 */
             .pointer {
                 top: -28px;
                 border-left-width: 28px;
@@ -253,7 +251,6 @@
             #nextBtn { right: 40px; }
         }
 
-        /* 專屬平板的漂浮幅度 (不使用 scale) */
         @keyframes tabletFloat {
             0% { transform: translateX(-50%) translateY(0px); }
             50% { transform: translateX(-50%) translateY(-16px); }
@@ -273,7 +270,7 @@
 
             .slider-viewport {
                 bottom: -100px; 
-                animation: syncFloat 4s ease-in-out infinite; 
+                animation: wheelFloat 4s ease-in-out infinite; 
             }
 
             .nav-btn {
@@ -355,7 +352,6 @@
       let isSpinning = false;
       let currentRotations = [0, 0];
 
-      // 將所有轉盤一律以最高畫質 (840px 基準) 進行底層渲染
       function setupHighDPIProperties(canvas, ctx) {
           const dpr = window.devicePixelRatio || 1;
           const maxLogicalSize = 840; 
@@ -374,7 +370,6 @@
           const numSlices = prizes.length;
           const sliceAngle = (2 * Math.PI) / numSlices;
           
-          // 在 840px 的大畫布裡尋找中心點
           const centerX = 420;
           const centerY = 420;
           const radius = 420;
@@ -398,10 +393,8 @@
               ctx.fillStyle = "#ffffff"; 
               
               const isManySlices = numSlices > 5;
-              // 字體同步等比放大渲染
               ctx.font = isManySlices ? `bold 25px ${fontConfig}` : `bold 31px ${fontConfig}`;
               
-              // 文字位置等比往外推
               ctx.fillText(prizes[i].name, radius - 49, 11);
               ctx.restore();
           }
